@@ -1,6 +1,8 @@
 
 #include "composite.h"
+#include "softrenderer.h"
 
+//TODO after figuring out how much ram is left after stack/data for processing commands for cpu mcu, try to expand the resolution
 uint8_t ramFB[242][59];
 
 void main()
