@@ -1,6 +1,7 @@
 #include "composite.h"
 #include "softrenderer.h"
 #include "vincent.h"//8x8 Font
+#include "spibus.h"
 
 //TODO after figuring out how much ram is left after stack/data for processing commands for cpu mcu, try to expand the resolution
 uint8_t ramFB[242][59];
@@ -36,6 +37,8 @@ void main()
     Composite_init((uint8_t*)ramFB);//First that way project information is displayed during initialization
     
     //TODO Do other init code here
+    //SPIBus_init_video();//TODO this breaks composite for some reason?
+    
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
     //Signal to the cpu that we are ready at this point
