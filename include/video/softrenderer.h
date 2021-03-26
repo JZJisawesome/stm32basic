@@ -43,7 +43,7 @@
 /* Settings (must be filled in) */
 //Defaults
 #define SR_BYTES_PER_LINE 59
-#define SR_LINES 241
+#define SR_LINES 242
 
 /* Public functions and macros */
 //ByByte functions are faster as they don't require bit manipulation, but give you less control
