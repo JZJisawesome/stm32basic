@@ -7,9 +7,11 @@ INCDIR =./include/
 CC = arm-none-eabi-gcc
 CFLAGS = -Wall -DF_CPU=16000000 -mthumb -mcpu=cortex-m3 -std=gnu17 -ffreestanding
 COMMONOPTIMIZINGCFLAGS = -flto -fuse-linker-plugin -fmerge-all-constants
-INC = -I$(INCDIR)
+INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
+LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
-DEPS = $(INCDIR)/common/bluepill.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/video/composite.h
+
 .PHONY: release debug
 release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
 debug: CFLAGS += -DDEBUG -g -Og
@@ -25,10 +27,10 @@ $(BUILDDIR)/video/video.hex: $(BUILDDIR)/video/video | $(BUILDDIR)/video
 	arm-none-eabi-objcopy -O ihex $(BUILDDIR)/video/video $(BUILDDIR)/video/video.hex
 
 $(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o | $(BUILDDIR)/cpu
-	$(CC) $(CFLAGS) -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o -o $(BUILDDIR)/cpu/cpu
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o -o $(BUILDDIR)/cpu/cpu
 
-$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o | $(BUILDDIR)/video
-	$(CC) $(CFLAGS) -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o -o $(BUILDDIR)/video/video
+$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o | $(BUILDDIR)/video
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o -o $(BUILDDIR)/video/video
 
 #Object files
 
@@ -46,6 +48,9 @@ $(BUILDDIR)/cpu/cpu.o: $(SRCDIR)/cpu/cpu.c $(DEPS) | $(BUILDDIR)/cpu
 
 $(BUILDDIR)/video/video.o: $(SRCDIR)/video/video.c $(DEPS) | $(BUILDDIR)/video
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/video.c -o $(BUILDDIR)/video/video.o
+
+$(BUILDDIR)/video/composite.o: $(SRCDIR)/video/composite.c $(DEPS) | $(BUILDDIR)/video
+	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/composite.c -o $(BUILDDIR)/video/composite.o
 
 #Build directories
 
