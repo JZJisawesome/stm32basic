@@ -10,7 +10,7 @@ COMMONOPTIMIZINGCFLAGS = -flto -fuse-linker-plugin -fmerge-all-constants
 INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
 LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
-DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/video/composite.h $(INCDIR)/video/softrenderer.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/video/composite.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
@@ -78,7 +78,9 @@ clean:
 .PHONY: flash_cpu
 flash_cpu: $(BUILDDIR)/cpu/cpu.hex
 	st-flash --format=ihex write $(BUILDDIR)/cpu/cpu.hex
-	
+	st-flash reset
+
 .PHONY: flash_video
 flash_video: $(BUILDDIR)/video/video.hex
 	st-flash --format=ihex write $(BUILDDIR)/video/video.hex
+	st-flash reset
