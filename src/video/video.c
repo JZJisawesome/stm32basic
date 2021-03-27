@@ -3,6 +3,7 @@
 #include "vincent.h"//8x8 Font
 #include "spibus.h"
 #include "processing.h"
+#include "spiio.h"
 
 //TODO after figuring out how much ram is left after stack/data for processing commands for cpu mcu, try to expand the resolution
 volatile uint8_t ramFB[242][59];
@@ -19,8 +20,6 @@ const uint8_t JZJ[] =//My initials
 
 void main()
 {
-    SPIIO_extiInit();
-    
     //Project information header
     SR_setCharacterRom(vincentFont);
     SR_setFrameBuffer((uint8_t*)ramFB);
@@ -41,7 +40,9 @@ void main()
     
     //TODO Do other init code here
     
-    SPIBus_init_video();//Should be last thing to initialize
+    //SPIBus_init_video();//Should be last thing to initialize
+    SPIIO_video_spiInit();//TESTING
+    while (true);//TESTING
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
     //Signal to the cpu that we are ready at this point

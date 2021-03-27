@@ -1,0 +1,2 @@
+openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f ./clone.cfg
+gdb-multiarch
