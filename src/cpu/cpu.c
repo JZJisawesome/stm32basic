@@ -10,8 +10,10 @@ void main()
     uint8_t i = 0;
     while (true)
     {
+        //__delayInstructions(50);//For stress testings
+        __delayInstructions(4720299);//About 1 second
         SPIBus_transfer_CPU(i);
-        __delayInstructions(47202987);//About 1 second
+        
         ++i;
     }
     

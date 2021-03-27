@@ -6,8 +6,8 @@
 
 static volatile uint16_t inBuffer[SPIIO_BUFFER_SIZE];
 static volatile uint16_t outBuffer[SPIIO_BUFFER_SIZE];
-static volatile uint16_t inCount = 0;
-static volatile uint16_t outCount = 0;
+static volatile uint16_t inPointer = 0;//CPU's pointer
+static volatile uint16_t outPointer = 0;//CPU's pointer
 
 static volatile bool recievedEXTIInterrupt = false;
 
@@ -38,11 +38,10 @@ void SPIIO_video_spiInit()
     SPI2_CR2 = 0b00000001;
     
     //DMA setup
-    DMA_CCR4 = 0b0000010110000000;
     DMA_CPAR4 = (uint32_t)(&SPI2_DR);
     DMA_CMAR4 = inBuffer;
     DMA_CNDTR4 = SPIIO_BUFFER_SIZE;
-    DMA_CCR4 |= 1;
+    DMA_CCR4 = 0b0000010110100001;
     
     //Enable interrupts
     //NVIC_ISER1 = 1 << 4;//Enable SPI2 ISR

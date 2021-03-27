@@ -5,7 +5,7 @@
 #include "spibus.h"
 
 static fifo_t commandQueue;
-static uint_fast16_t xPosition = 208;//Pixels
+static uint_fast16_t xPosition = 200;//Pixels
 static uint_fast16_t yPosition = 32;//Pixels
 
 static void processingLoop();

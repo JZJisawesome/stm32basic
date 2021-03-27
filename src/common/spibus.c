@@ -29,8 +29,8 @@ void SPIBus_init_CPU()
     GPIOB_CRH |= 0xB0B30000;
     
     //16 bit data frame, software slave management, internal slave select high, MSBFIRST, enable SPI, master mode, divide 36mhz peripheral clock by 2 for 18mbit, CPOL = 0, CPHA = 0
-    //SPI2_CR1 = 0b0000101101000100;
-    SPI2_CR1 = 0b0000101101111100;//TESTING slower clock that can be seen by logic analyzer
+    SPI2_CR1 = 0b0000101101000100;
+    //SPI2_CR1 = 0b0000101101111100;//TESTING slower clock that can be seen by logic analyzer
 }
 
 void SPIBus_transfer_CPU(uint16_t data)
