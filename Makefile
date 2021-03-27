@@ -10,7 +10,7 @@ COMMONOPTIMIZINGCFLAGS = -flto -fuse-linker-plugin -fmerge-all-constants
 INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
 LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
-DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/common/spibus.h $(INCDIR)/video/composite.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/vincent.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/common/fifo.h $(INCDIR)/common/spibus.h $(INCDIR)/video/composite.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
@@ -26,11 +26,11 @@ $(BUILDDIR)/cpu/cpu.hex: $(BUILDDIR)/cpu/cpu | $(BUILDDIR)/cpu
 $(BUILDDIR)/video/video.hex: $(BUILDDIR)/video/video | $(BUILDDIR)/video
 	arm-none-eabi-objcopy -O ihex $(BUILDDIR)/video/video $(BUILDDIR)/video/video.hex
 
-$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/cpu/cpu.o | $(BUILDDIR)/cpu
-	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/cpu/cpu.o -o $(BUILDDIR)/cpu/cpu
+$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/cpu/cpu.o | $(BUILDDIR)/cpu
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/cpu/cpu.o -o $(BUILDDIR)/cpu/cpu
 
-$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/softrenderer.o | $(BUILDDIR)/video
-	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/softrenderer.o -o $(BUILDDIR)/video/video
+$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/softrenderer.o | $(BUILDDIR)/video
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/softrenderer.o -o $(BUILDDIR)/video/video
 
 #Object files
 
@@ -39,6 +39,8 @@ $(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/spibus
 $(BUILDDIR)/common/bluepill.o: $(SRCDIR)/common/bluepill.S $(DEPS) | $(BUILDDIR)/common
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/common/bluepill.S -o $(BUILDDIR)/common/bluepill.o
 
+$(BUILDDIR)/common/fifo.o: $(SRCDIR)/common/fifo.c $(DEPS) | $(BUILDDIR)/common
+	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/common/fifo.c -o $(BUILDDIR)/common/fifo.o
 
 $(BUILDDIR)/common/spibus.o: $(SRCDIR)/common/spibus.c $(DEPS) | $(BUILDDIR)/common
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/common/spibus.c -o $(BUILDDIR)/common/spibus.o

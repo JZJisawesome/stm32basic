@@ -7,10 +7,12 @@ void main()
     SPIBus_init_CPU();
     
     //TESTING
+    uint8_t i = 0;
     while (true)
     {
-        SPIBus_transfer_CPU('J');
+        SPIBus_transfer_CPU(i);
         __delayInstructions(47202987);//About 1 second
+        ++i;
     }
     
     return;//Temporary
