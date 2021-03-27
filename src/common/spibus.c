@@ -44,11 +44,6 @@ void SPIBus_transfer_CPU(uint16_t data)
     GPIOB_BSRR = (1 << 12);
 }
 
-uint16_t SPIBus_recieve_video()
-{
-    return SPI2_DR;
-}
-
 //Stuff that is useful for the fifo
 
 void SPIBus_disableInterrupts_video()
