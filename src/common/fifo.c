@@ -1,7 +1,7 @@
 #include "fifo.h"
 #include "bluepill.h"
 
-void FIFO_init(fifo_t* fifo)
+void FIFO_init(fifo_t* fifo)//NOTE not really needed
 {
     fifo->readPointer = 0;
     fifo->writePointer = 0;
@@ -24,7 +24,7 @@ bool FIFO_isEmpty(fifo_t* fifo)
     return fifo->readPointer == fifo->writePointer;
 }
 
-void FIFO_push(fifo_t* fifo, uint16_t data)//If full, does nothing
+void FIFO_push(fifo_t* fifo, uint16_t data)
 {
     fifo->data[fifo->writePointer] = data;
     
@@ -34,7 +34,7 @@ void FIFO_push(fifo_t* fifo, uint16_t data)//If full, does nothing
         fifo->writePointer += 1;
 }
 
-uint16_t FIFO_pop(fifo_t* fifo)//If empty, returns null and does nothing
+uint16_t FIFO_pop(fifo_t* fifo)
 {
     uint16_t data = fifo->data[fifo->readPointer];
     

@@ -10,4 +10,7 @@ void SPIBus_init_CPU();//For cpu MCU
 void SPIBus_transfer_CPU(uint16_t data);//Blocking, just for testing
 uint16_t SPIBus_recieve_video();//Blocking, just for testing
 
+void SPIBus_disableInterrupts_video();
+void SPIBus_enableInterrupts_video();
+
 #endif

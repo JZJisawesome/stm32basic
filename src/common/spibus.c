@@ -49,6 +49,8 @@ uint16_t SPIBus_recieve_video()
     return SPI2_DR;
 }
 
+//Stuff that is useful for the fifo
+
 void SPIBus_disableInterrupts_video()
 {
     NVIC_ICER1 = 1 << 4;//Disable SPI2 ISR during pop
