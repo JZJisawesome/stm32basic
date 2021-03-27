@@ -4,7 +4,7 @@
 #include "spibus.h"
 
 //TODO after figuring out how much ram is left after stack/data for processing commands for cpu mcu, try to expand the resolution
-uint8_t ramFB[242][59];
+volatile uint8_t ramFB[242][59];
 
 const uint8_t JZJ[] =//My initials
 {
@@ -15,6 +15,8 @@ const uint8_t JZJ[] =//My initials
 	0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+
+void processingLoop();
 
 void main()
 {
@@ -37,13 +39,29 @@ void main()
     Composite_init((uint8_t*)ramFB);//First that way project information is displayed during initialization
     
     //TODO Do other init code here
-    //SPIBus_init_video();//TODO this breaks composite for some reason?
-    
+    SPIBus_init_video();//Should be last thing to initialize
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
     //Signal to the cpu that we are ready at this point
     
-    //TODO handle commands from second spi peripheral
+    processingLoop();//Never exits
     
-    return;
+    return;//Should never
+}
+
+void processingLoop()
+{
+    int i = 0;
+    while (true)
+    {
+        //TODO handle commands from second spi peripheral
+        SR_drawCharByByte(1 + i, 44, SPIBus_recieve_video());
+        __delayInstructions(4720299);//About 0.1s//TESTING
+        ++i;
+    }
+}
+
+__attribute__ ((interrupt ("IRQ"))) void __ISR_SPI2()
+{
+    //TODO handle data recieved when recieve buffer no longer empty
 }
