@@ -7,9 +7,9 @@
 
 typedef struct
 {
-    uint16_t data[FIFO_SIZE];
-    uint16_t readPointer;//Next place to read
-    uint16_t writePointer;//Next place to write to
+    volatile uint16_t data[FIFO_SIZE];
+    volatile uint16_t readPointer;//Next place to read
+    volatile uint16_t writePointer;//Next place to write to
 } fifo_t;
 
 void FIFO_init(fifo_t* fifo);

@@ -15,6 +15,10 @@ void SPIBus_init_video()
     
     //16 bit data frame, hardware slave management, MSBFIRST, enable SPI, slave mode, CPOL = 0, CPHA = 0
     SPI2_CR1 = 0b0000100001000000;
+    
+    //Enable interrupts
+    NVIC_ISER1 = 1 << 4;//Enable SPI2 ISR
+    SPI2_CR2 |= 1 << 6;//Enable RXNE interrupt
 }
 
 void SPIBus_init_CPU()
@@ -43,4 +47,14 @@ void SPIBus_transfer_CPU(uint16_t data)
 uint16_t SPIBus_recieve_video()
 {
     return SPI2_DR;
+}
+
+void SPIBus_disableInterrupts_video()
+{
+    NVIC_ICER1 = 1 << 4;//Disable SPI2 ISR during pop
+}
+
+void SPIBus_enableInterrupts_video()
+{
+    NVIC_ISER1 = 1 << 4;//Enable SPI2 ISR
 }

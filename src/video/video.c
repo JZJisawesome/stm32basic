@@ -17,8 +17,8 @@ const uint8_t JZJ[] =//My initials
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-fifo_t spiFifo;
-
+//TODO maybe seperate out processing logic?
+fifo_t commandQueue;
 void processingLoop();
 
 void main()
@@ -42,6 +42,8 @@ void main()
     Composite_init((uint8_t*)ramFB);//First that way project information is displayed during initialization
     
     //TODO Do other init code here
+    FIFO_init(&commandQueue);
+    
     SPIBus_init_video();//Should be last thing to initialize
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
@@ -54,6 +56,7 @@ void main()
 
 void processingLoop()
 {
+    /*
     int i = 0;
     while (true)
     {
@@ -62,9 +65,29 @@ void processingLoop()
         __delayInstructions(4720299);//About 0.1s//TESTING
         ++i;
     }
+    */
+    int i = 0;
+    while (true)
+    {
+        //TODO handle commands from second spi peripheral
+        if (!FIFO_isEmpty(&commandQueue))
+        {
+            SPIBus_disableInterrupts_video();//Disable SPI2 ISR during pop
+            char data = FIFO_pop(&commandQueue);
+            SPIBus_enableInterrupts_video();//Enable SPI2 ISR
+            
+            SR_drawCharByByte(1 + i, 44, data);
+            ++i;
+        }
+        //__delayInstructions(1);//About 0.1s//TESTING things break without this if lto is enabled
+    }
 }
 
+//TODO maybe replace this interrupt with DMA into the fifo?
 __attribute__ ((interrupt ("IRQ"))) void __ISR_SPI2()
 {
     //TODO handle data recieved when recieve buffer no longer empty
+    
+    if (!FIFO_isFull(&commandQueue))//Else command is lost
+        FIFO_push(&commandQueue, SPIBus_recieve_video());//Reading will clear the RXNE flag
 }
