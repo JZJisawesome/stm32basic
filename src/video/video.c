@@ -19,6 +19,8 @@ const uint8_t JZJ[] =//My initials
 
 void main()
 {
+    SPIIO_extiInit();
+    
     //Project information header
     SR_setCharacterRom(vincentFont);
     SR_setFrameBuffer((uint8_t*)ramFB);
