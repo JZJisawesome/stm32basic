@@ -4,10 +4,10 @@
 
 //Static variables
 
-static volatile uint16_t inBuffer[SPIIO_BUFFER_SIZE];
-static volatile uint16_t outBuffer[SPIIO_BUFFER_SIZE];
-static volatile uint16_t inPointer = 0;//CPU's pointer
-static volatile uint16_t outPointer = 0;//CPU's pointer
+static volatile uint16_t inBuffer[SPIIO_BUFFER_SIZE];//Fed by DMA
+static volatile uint16_t outBuffer[SPIIO_BUFFER_SIZE];//Read by DMA
+static volatile uint16_t inPointer = 0;//Software pointer (not DMA pointer)
+static volatile uint16_t outPointer = 0;//Software pointer (not DMA pointer)
 
 static volatile bool recievedEXTIInterrupt = false;
 
@@ -43,24 +43,34 @@ void SPIIO_video_init()
     //Med priority, 16 bit memory and peripheral transfers, memory increment, circular mode, read from peripheral, enable channel
     DMA_CCR4 = 0b0001010110100001;
     
-    //Enable interrupts
-    //NVIC_ISER1 = 1 << 4;//Enable SPI2 ISR
-    //SPI2_CR2 |= 1 << 6;//Enable RXNE interrupt
+    //TODO setup DMA channel 5 for sending data to cpu mcu
     
     //TODO signal to cpu with positive edge that video is ready
 }
 
 bool SPIIO_video_empty()//If in buffer is empty
 {
+    //Assumes no overruns
     return inPointer == (SPIIO_BUFFER_SIZE - DMA_CNDTR4);
 }
 
 uint16_t SPIIO_video_pop()
 {
-    return inBuffer[inPointer++];
+    uint16_t data = inBuffer[inPointer];
+    
+    if (inPointer >= (SPIIO_BUFFER_SIZE - 1))
+        inPointer = 0;
+    else
+        ++inPointer;
+    
+    return data;
 }
 
 //Functions for cpu
+
+void SPIIO_cpu_init()
+{
+}
 
 /*
 void SPIIO_cpu_spiInit()
