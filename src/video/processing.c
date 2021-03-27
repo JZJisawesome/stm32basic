@@ -3,6 +3,7 @@
 #include "softrenderer.h"
 #include "fifo.h"
 #include "spibus.h"
+#include "spiio.h"
 
 static fifo_t commandQueue;
 static uint_fast16_t xPosition = 200;//Pixels
@@ -46,14 +47,14 @@ static void processingLoop()
     */
     while (true)
     {
-        if (FIFO_isEmpty(&commandQueue))
+        if (SPIIO_video_empty())
             //__wfi();
             ((void)0);//TESTING Debugging dies if this is wfi; change to wfi at end of development
         else
         {
-            SPIBus_disableInterrupts_video();//Disable SPI2 ISR during pop
-            uint16_t command = FIFO_pop(&commandQueue);
-            SPIBus_enableInterrupts_video();//Enable SPI2 ISR
+            //SPIBus_disableInterrupts_video();//Disable SPI2 ISR during pop
+            uint16_t command = SPIIO_video_pop();
+            //SPIBus_enableInterrupts_video();//Enable SPI2 ISR
             
             switch (command >> 9)//Look at bits [15:9] for the command to execute
             {
@@ -161,10 +162,11 @@ static void incrementCharacterPosition()
 }
 
 //TODO maybe replace this interrupt with DMA into the fifo?
+/*
 __attribute__ ((interrupt ("IRQ"))) void __ISR_SPI2()
 {
     //TODO handle data recieved when recieve buffer no longer empty
     
     if (!FIFO_isFull(&commandQueue))//Else command is lost
         FIFO_push(&commandQueue, SPIBus_recieve_video());//Reading will clear the RXNE flag
-}
+}*/

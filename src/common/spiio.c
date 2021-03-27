@@ -25,8 +25,7 @@ static void SPIIO_extiInit()
 
 //Functions for video
 
-
-void SPIIO_video_spiInit()
+void SPIIO_video_init()
 {
     //SPIIO_extiInit();
     
@@ -39,15 +38,26 @@ void SPIIO_video_spiInit()
     
     //DMA setup
     DMA_CPAR4 = (uint32_t)(&SPI2_DR);
-    DMA_CMAR4 = inBuffer;
+    DMA_CMAR4 = (uint32_t)(inBuffer);
     DMA_CNDTR4 = SPIIO_BUFFER_SIZE;
-    DMA_CCR4 = 0b0000010110100001;
+    //Med priority, 16 bit memory and peripheral transfers, memory increment, circular mode, read from peripheral, enable channel
+    DMA_CCR4 = 0b0001010110100001;
     
     //Enable interrupts
     //NVIC_ISER1 = 1 << 4;//Enable SPI2 ISR
     //SPI2_CR2 |= 1 << 6;//Enable RXNE interrupt
     
     //TODO signal to cpu with positive edge that video is ready
+}
+
+bool SPIIO_video_empty()//If in buffer is empty
+{
+    return inPointer == (SPIIO_BUFFER_SIZE - DMA_CNDTR4);
+}
+
+uint16_t SPIIO_video_pop()
+{
+    return inBuffer[inPointer++];
 }
 
 //Functions for cpu

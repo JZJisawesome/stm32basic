@@ -40,8 +40,8 @@ void main()
     
     //TODO Do other init code here
     
-    SPIBus_init_video();//Should be last thing to initialize
-    //SPIIO_video_spiInit();//TESTING
+    //SPIBus_init_video();//Should be last thing to initialize
+    SPIIO_video_init();//TESTING
     //while (true);//TESTING
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
