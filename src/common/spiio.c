@@ -10,8 +10,7 @@ static volatile uint16_t inBuffer[SPIIO_BUFFER_SIZE];//Fed by DMA
 static volatile uint16_t outBuffer[SPIIO_BUFFER_SIZE];//Read by DMA
 static uint16_t inPointer = 0;//Software pointer (not DMA pointer)
 static uint16_t outPointer = 0;//Software pointer (not DMA pointer)
-//static volatile uint16_t dmaOutPointer = 0;//DMA pointer
-//static volatile uint16_t dmaCount;
+static bool dmaOutBufferFirstHalf = true;
 
 static volatile bool recievedEXTIInterrupt = false;
 
@@ -135,7 +134,45 @@ void SPIIO_cpu_flush()
 }
 */
 
+bool SPIIO_cpu_full()//If out buffer is full
+{
+    if (dmaOutBufferFirstHalf)
+        return outPointer >= HALF_BUFFER_SIZE;
+    else
+        return outPointer >= SPIIO_BUFFER_SIZE;
+}
 
+void SPIIO_cpu_push(uint16_t data)//Only call this if SPIIO_cpu_full() is false
+{
+    outBuffer[outPointer] = data;
+    ++outPointer;
+}
+
+void SPIIO_cpu_flush()
+{
+    if (DMA_CNDTR5 == 0)//Transfer not currently occuring
+    {
+        uint16_t offset = dmaOutBufferFirstHalf ? 0 : HALF_BUFFER_SIZE;
+        uint16_t amountToTransfer = outPointer - offset;
+        
+        DMA_CCR5 &= ~1;//Disable DMA channel while modifying stuffs
+        DMA_CMAR5 = (uint32_t)(outBuffer + offset);
+        DMA_CNDTR5 = amountToTransfer;
+        DMA_CCR5 |= 1;//Enable and start dma transfer
+        
+        outPointer = dmaOutBufferFirstHalf ? HALF_BUFFER_SIZE : 0;//Set out pointer to other half of buffer
+        dmaOutBufferFirstHalf = !dmaOutBufferFirstHalf;
+    }
+    
+    //TODO provide blocking function and figure out way to handle slave select
+    //DMA_CCR5 &= ~1;
+    //DMA_CNDTR5 = outPointer;
+    //DMA_CCR5 |= 1;//Enable dma transfer
+    
+    //outPointer = 0;//TODO only reset this after dma finishes/allow pushes during flush
+}
+
+/*
 bool SPIIO_cpu_full()//If out buffer is full
 {
     return outPointer >= SPIIO_BUFFER_SIZE;
@@ -156,7 +193,7 @@ void SPIIO_cpu_flush()
     
     outPointer = 0;//TODO only reset this after dma finishes/allow pushes during flush
 }
-
+*/
 
 /*
 void SPIIO_cpu_spiInit()
@@ -170,11 +207,6 @@ void SPIIO_cpu_spiInit()
 }*/
 
 //Interrupts
-
-__attribute__ ((interrupt ("IRQ"))) void __ISR_DMA1_Channel5()
-{
-    //TODO set new value for dmaOutPointer here based on old value of dmaOutPointer and dmaCount
-}
 
 /*
 __attribute__ ((interrupt ("IRQ"))) void __ISR_EXTI0()
