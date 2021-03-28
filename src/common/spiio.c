@@ -86,8 +86,7 @@ void SPIIO_cpu_init()
     DMA_CPAR5 = (uint32_t)(&SPI2_DR);
     DMA_CMAR5 = (uint32_t)(outBuffer);
     //Med priority, 16 bit memory and peripheral transfers, memory increment, write to peripheral
-    //DMA_CCR5 = 0b0001010110010000;//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
-    (*(volatile uint32_t*)(0x40020058)) = 0b0001010110010000;//TESTING//Causes asynchronous fault that causes a hard fault
+    DMA_CCR5 = 0b0001010110010000;
     
     //TODO wait for positive edge from video mcu to signal it is ready
 }
@@ -105,17 +104,10 @@ void SPIIO_cpu_push(uint16_t data)//Only call this if SPIIO_cpu_full() is false
 
 void SPIIO_cpu_flush()
 {
-    //TODO provide block function
-    //DMA_CCR5 &= ~1;//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
-    (*(volatile uint32_t*)(0x40020058)) &= ~1;//TESTING//Causes asynchronous fault that causes a hard fault
-    //(*(volatile uint32_t*)(0x40020058)) = 0b0001010110010000;//Causes asynchronous fault that causes a hard fault
-    
-    //DMA_CNDTR5 = outPointer;
-    (*(volatile uint32_t*)(0x4002005C)) = outPointer;
-    
-    //DMA_CCR5 |= 1;//Enable//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
-    (*(volatile uint32_t*)(0x40020058)) |= 1;//TESTING//Causes asynchronous fault that causes a hard fault
-    //(*(volatile uint32_t*)(0x40020058)) = 0b0001010110010001;//Causes asynchronous fault that causes a hard fault
+    //TODO provide blocking function and figure out way to handle slave select
+    DMA_CCR5 &= ~1;
+    DMA_CNDTR5 = outPointer;
+    DMA_CCR5 |= 1;//Enable dma transfer
     
     outPointer = 0;//TODO only reset this after dma finishes/allow pushes during flush
 }
@@ -137,5 +129,3 @@ __attribute__ ((interrupt ("IRQ"))) void __ISR_EXTI0()
 {
     recievedEXTIInterrupt = true;//Got an interrupt
 }*/
-
-__attribute__ ((interrupt ("IRQ"))) void __ISR_HardFault() { while (true); }
