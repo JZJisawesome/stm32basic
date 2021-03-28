@@ -24,12 +24,17 @@ void main()
     
     while (true)
     {
-        __delayInstructions(4720299);
+        __delayInstructions(4720299);//TESTING
+        //__delayInstructions(4720);//TESTING
+        //while (DMA_CNDTR5);//TESTING
+        
         for (uint32_t i = 0; i < 64; ++i)
         {
             SPIIO_cpu_push(i);
         }
         SPIIO_cpu_flush();
+        
+        
     }
     
     return;//Temporary
