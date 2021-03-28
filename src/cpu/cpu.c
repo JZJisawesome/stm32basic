@@ -31,11 +31,11 @@ void main()
     
     __delayInstructions(4720299);//TESTING
     
-    VHAL_drawLineTo(300, 200);
-    VHAL_drawLineTo(150, 100);
+    //VHAL_drawLineTo(300, 200);
+    //VHAL_drawLineTo(150, 100);
     //VHAL_clear();
-    //for (uint32_t i = 0; i < 256; ++i)
-    //    VHAL_drawLine_atPos(0, 0, 400, i);
+    for (uint32_t i = 0; i < 256; ++i)
+        VHAL_drawLine_atPos(0, 0, 400, i);
     
     VHAL_flush();
     

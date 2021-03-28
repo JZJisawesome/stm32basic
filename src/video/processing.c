@@ -1,7 +1,7 @@
 #include "processing.h" 
 #include "bluepill.h"
 #include "softrenderer.h"
-#include "spiio.h"
+#include "spiio_video.h"
 
 //TODO seperate out processing loop/switches from code that actually does stuff somehow
 
@@ -30,12 +30,12 @@ static void processingLoop()
 {
     while (true)
     {
-        if (SPIIO_video_empty())
+        if (SPIIO_empty())
             //__wfi();
             ((void)0);//TESTING Debugging dies if this is wfi; change to wfi at end of development
         else
         {
-            uint16_t command = SPIIO_video_pop();
+            uint16_t command = SPIIO_pop();
             
             switch (multiCommand)
             {
