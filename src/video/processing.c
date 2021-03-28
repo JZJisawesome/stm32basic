@@ -3,6 +3,8 @@
 #include "softrenderer.h"
 #include "spiio.h"
 
+//TODO seperate out processing loop/switches from code that actually does stuff somehow
+
 static const uint8_t* frameBuffer;//Pointer to framebuffer
 static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
 
@@ -11,7 +13,9 @@ static uint_fast16_t yPosition = 32;//Pixels
 static uint_fast16_t scratch[8];
 
 static void processingLoop();
+static void handleSingleCommand(uint16_t command);
 static void handleCharacter(char character);
+static void screenOperation(uint16_t operation);
 static void incrementCharacterPosition();
 
 void Processing_begin(const uint8_t* fb)
@@ -37,65 +41,7 @@ static void processingLoop()
             {
                 case 0://Not in the middle of a multi command command; parse normally
                 {
-                    switch (command >> 9)//Look at bits [15:9] for the command to execute
-                    {
-                        case 0://Character write
-                        {//0 was chosen because it means that a character can just be sent as is from the CPU
-                            //NOTE: Command bits [9:7] may have additional info that can be used
-                            handleCharacter(command & 0x7F);
-                            break;
-                        }
-                        case 1://Screen operation
-                        {
-                            switch (command & 0x1FF)
-                            {
-                                case 0:
-                                {
-                                    SR_clear();
-                                    break;
-                                }
-                                case 1:
-                                {
-                                    SR_fill();
-                                    break;
-                                }
-                                case 2:
-                                {
-                                    SR_scrollUp(8);
-                                    break;
-                                }
-                            }
-                        }
-                        case 2://String write (more efficient than individual character writes)
-                        {//Ends when a null byte is encountered
-                            char character = command & 0xFF;
-                            if (character)
-                            {
-                                multiCommand = 2;
-                                handleCharacter(character);
-                            }
-                            break;
-                        }
-                        case 3://Set x position
-                        {
-                            xPosition = command & 0x1FF;
-                            break;
-                        }
-                        case 4://Set y position
-                        {
-                            yPosition = command & 0x1FF;
-                            break;
-                        }
-                        case 5://Line draw from current position
-                        {
-                            scratch[0] = command & 0x1FF;//x destination
-                            multiCommand = 5;
-                        }
-                        default:
-                        {
-                            break;
-                        }
-                    }
+                    handleSingleCommand(command);
                     break;
                 }
                 case 2://String write (more efficient than individual character writes)
@@ -130,6 +76,53 @@ static void processingLoop()
                     break;
                 }
             }
+        }
+    }
+}
+
+static void handleSingleCommand(uint16_t command)
+{
+    switch (command >> 9)//Look at bits [15:9] for the command to execute
+    {
+        case 0://Character write
+        {//0 was chosen because it means that a character can just be sent as is from the CPU
+            //NOTE: Command bits [9:7] may have additional info that can be used
+            handleCharacter(command & 0x7F);
+            break;
+        }
+        case 1://Screen operation
+        {
+            screenOperation(command & 0x1FF);
+            break;
+        }
+        case 2://String write (more efficient than individual character writes)
+        {//Ends when a null byte is encountered
+            char character = command & 0xFF;
+            if (character)
+            {
+                multiCommand = 2;
+                handleCharacter(character);
+            }
+            break;
+        }
+        case 3://Set x position
+        {
+            xPosition = command & 0x1FF;
+            break;
+        }
+        case 4://Set y position
+        {
+            yPosition = command & 0x1FF;
+            break;
+        }
+        case 5://Line draw from current position
+        {
+            scratch[0] = command & 0x1FF;//x destination
+            multiCommand = 5;
+        }
+        default:
+        {
+            break;
         }
     }
 }
@@ -224,4 +217,31 @@ static void incrementCharacterPosition()
     
     if (yPosition >= PROCESSING_LINES)
         yPosition = 8;//So character is not cut off
+}
+
+static void screenOperation(uint16_t operation)
+{
+    switch (operation)
+    {
+        case 0:
+        {
+            SR_clear();
+            break;
+        }
+        case 1:
+        {
+            SR_fill();
+            break;
+        }
+        case 2:
+        {
+            SR_scrollUp(8);
+            break;
+        }
+        case 3:
+        {
+            SR_scrollDown(8);
+            break;
+        }
+    }
 }

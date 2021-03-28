@@ -122,7 +122,7 @@ void SR_scrollUp(uint32_t amount)
 
 void SR_scrollDown(uint32_t amount)
 {
-    
+    //TODO implement
 }
 
 /* Character Drawing */
