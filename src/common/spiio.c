@@ -14,7 +14,7 @@ static uint16_t inPointer = 0;//Software pointer (not DMA pointer)
 static uint16_t outPointer = 0;//Software pointer (not DMA pointer)
 static bool dmaOutBufferFirstHalf = true;
 
-static volatile bool recievedEXTIInterrupt = false;
+//static volatile bool recievedEXTIInterrupt = false;
 
 //Static functions
 

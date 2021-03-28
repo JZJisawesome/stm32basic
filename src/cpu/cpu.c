@@ -1,5 +1,6 @@
 #include "bluepill.h"
 #include "spiio.h"
+#include "vhal.h"
 
 void printString(const char* string);
 
@@ -24,18 +25,19 @@ void main()
     //__delayInstructions(47202999);//TODO instead of delaying, have SPIIO_cpu_init block until video mcu is ready
     SPIIO_cpu_init();
     
-    printString("CPU MCU Initialized\n");
-    printString("????? basic bytes free :)\n");
-    SPIIO_cpu_flush();
+    VHAL_drawText("CPU MCU Initialized\n");
+    VHAL_drawText("????? basic bytes free :)\n");
+    //VHAL_flush();
     
     __delayInstructions(4720299);//TESTING
     
-    while (SPIIO_cpu_full()) { SPIIO_cpu_flush(); }
-    SPIIO_cpu_push((5 << 9) | 300);
-    SPIIO_cpu_push(200);
-    SPIIO_cpu_push((5 << 9) | 150);
-    SPIIO_cpu_push(100);
-    SPIIO_cpu_flush();
+    VHAL_drawLineTo(300, 200);
+    VHAL_drawLineTo(150, 100);
+    //VHAL_clear();
+    //for (uint32_t i = 0; i < 256; ++i)
+    //    VHAL_drawLine_atPos(0, 0, 400, i);
+    
+    VHAL_flush();
     
     /*
     __delayInstructions(47202999);
