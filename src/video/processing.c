@@ -81,6 +81,21 @@ static void processingLoop()
                     multiCommand = 0;
                     break;
                 }
+                case 9://Triangle from current position
+                {
+                    if (scratch[4] == 3)
+                    {
+                        SR_drawTriangle(xPosition, yPosition, scratch[0], scratch[1], scratch[2], command & 0x1FF);
+                        multiCommand = 0;//End this command
+                    }
+                    else
+                    {
+                        scratch[scratch[4]] = command & 0x1FF;//Save coords
+                        scratch[4] += 1;
+                    }
+                    
+                    break;
+                }
             }
         }
     }
@@ -147,13 +162,13 @@ static void handleSingleCommand(uint16_t command)
             multiCommand = 8;
             break;
         }
-        /*case 9://Triangle from current position
+        case 9://Triangle from current position
         {
-            scratch[0] = command & 0x1FF;//x destination 1
+            scratch[0] = command & 0x1FF;//x1
             scratch[4] = 1;//Current step of fetching triangle coordinates
             multiCommand = 9;
             break;
-        }*/
+        }
         default:
         {
             break;

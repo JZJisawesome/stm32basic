@@ -30,5 +30,7 @@ void VHAL_drawLineTo(uint16_t x, uint16_t y);
 //Shape drawing
 void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount);
 void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount);
+void VHAL_drawTriangle_atPos(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+void VHAL_drawTriangle(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
 
 #endif

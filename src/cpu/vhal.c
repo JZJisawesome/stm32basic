@@ -122,3 +122,21 @@ void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount)
     SPIIO_smartBlockingFlush();
     SPIIO_push(yCount);//End with sending y size
 }
+
+void VHAL_drawTriangle_atPos(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+{
+    VHAL_setPos(x0, y0);
+    VHAL_drawTriangle(x1, y1, x2, y2);
+}
+
+void VHAL_drawTriangle(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+{
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((9 << 9) | x1);//Start multi command transfer of tri and send x1
+    SPIIO_smartBlockingFlush();
+    SPIIO_push(y1);
+    SPIIO_smartBlockingFlush();
+    SPIIO_push(x2);
+    SPIIO_smartBlockingFlush();
+    SPIIO_push(y2);
+}
