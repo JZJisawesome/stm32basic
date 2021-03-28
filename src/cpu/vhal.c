@@ -3,6 +3,15 @@
 #include "bluepill.h"
 #include "spiio_cpu.h"
 
+//Position management
+void VHAL_setPos(uint16_t x, uint16_t y)
+{
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((3 << 9) | x);//Set x position
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((4 << 9) | y);//Set y position
+}
+
 //Screen Manipulation
 void VHAL_clear()
 {
@@ -29,6 +38,18 @@ void VHAL_scrollDown()
 }
 
 //Text/Character drawing
+void VHAL_drawChar_atPos(uint16_t x, uint16_t y, char character)
+{
+    VHAL_setPos(x, y);
+    VHAL_drawChar(character);
+}
+
+void VHAL_drawChar(char character)
+{
+    SPIIO_smartBlockingFlush();
+    SPIIO_push(character);//Pushing characters is designed to be fast
+}
+
 void VHAL_drawText_atPos(uint16_t x, uint16_t y, const char* string)
 {
     VHAL_setPos(x, y);
@@ -87,11 +108,17 @@ void VHAL_drawLineTo(uint16_t x, uint16_t y)
     SPIIO_push(y);//End with sending y coordinate
 }
 
-//Position management
-void VHAL_setPos(uint16_t x, uint16_t y)
+//Shape drawing
+void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount)
+{
+    VHAL_setPos(x, y);
+    VHAL_drawRectangle(xCount, yCount);
+}
+
+void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount)
 {
     SPIIO_smartBlockingFlush();
-    SPIIO_push((3 << 9) | x);//Set x position
+    SPIIO_push((8 << 9) | xCount);//Start multi command transfer of rect size and send x size
     SPIIO_smartBlockingFlush();
-    SPIIO_push((4 << 9) | y);//Set y position
+    SPIIO_push(yCount);//End with sending y size
 }

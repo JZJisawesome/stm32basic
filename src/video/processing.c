@@ -75,6 +75,12 @@ static void processingLoop()
                     yPosition = destYPos;
                     break;
                 }
+                case 8://Rectangle from current position
+                {
+                    SR_drawRectangle(xPosition, yPosition, scratch[0], command & 0x1FF);
+                    multiCommand = 0;
+                    break;
+                }
             }
         }
     }
@@ -119,7 +125,35 @@ static void handleSingleCommand(uint16_t command)
         {
             scratch[0] = command & 0x1FF;//x destination
             multiCommand = 5;
+            break;
         }
+        case 6://Horizontal line draw from current position
+        {
+            uint16_t count = command & 0x1FF;
+            SR_drawHLine(xPosition, yPosition, count);
+            xPosition += count;
+            break;
+        }
+        case 7://Vertical line draw from current position
+        {
+            uint16_t count = command & 0x1FF;
+            SR_drawVLine(xPosition, yPosition, count);
+            yPosition += count;
+            break;
+        }
+        case 8://Rectangle from current position
+        {
+            scratch[0] = command & 0x1FF;//x count
+            multiCommand = 8;
+            break;
+        }
+        /*case 9://Triangle from current position
+        {
+            scratch[0] = command & 0x1FF;//x destination 1
+            scratch[4] = 1;//Current step of fetching triangle coordinates
+            multiCommand = 9;
+            break;
+        }*/
         default:
         {
             break;

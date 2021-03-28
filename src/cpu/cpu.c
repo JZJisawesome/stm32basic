@@ -33,6 +33,7 @@ void main()
     
     VHAL_drawLineTo(300, 200);
     VHAL_drawLineTo(150, 100);
+    VHAL_drawRectangle(10, 10);
     VHAL_flush();
     //VHAL_clear();
     /*
@@ -73,13 +74,10 @@ void main()
         uint32_t i = 0;
         while (i < 256)
         {
-            if (SPIIO_cpu_full())
-                SPIIO_cpu_flush();
-            else
-                SPIIO_cpu_push(i++ & 0xFF);
+            VHAL_drawChar(i++);
         }
         */
     }
     
-    return;//Temporary
+    return;
 }
