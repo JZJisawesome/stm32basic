@@ -26,7 +26,7 @@ $(BUILDDIR)/cpu/cpu.hex: $(BUILDDIR)/cpu/cpu | $(BUILDDIR)/cpu
 $(BUILDDIR)/video/video.hex: $(BUILDDIR)/video/video | $(BUILDDIR)/video
 	arm-none-eabi-objcopy -O ihex $(BUILDDIR)/video/video $(BUILDDIR)/video/video.hex
 
-$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/cpu/cpu.o | $(BUILDDIR)/cpu
+$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/common/spiio.o $(BUILDDIR)/cpu/cpu.o | $(BUILDDIR)/cpu
 	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/common/spiio.o $(BUILDDIR)/cpu/cpu.o -o $(BUILDDIR)/cpu/cpu
 
 $(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/common/fifo.o $(BUILDDIR)/common/spibus.o $(BUILDDIR)/common/spiio.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/processing.o $(BUILDDIR)/video/softrenderer.o | $(BUILDDIR)/video

@@ -34,9 +34,9 @@ void SPIIO_video_init()
     
     //16 bit data frame, hardware slave management, MSBFIRST, enable SPI, slave mode, CPOL = 0, CPHA = 0
     SPI2_CR1 = 0b0000100001000000;
-    SPI2_CR2 = 0b00000001;
+    SPI2_CR2 = 0b00000001;//DMA request on rxne
     
-    //DMA setup
+    //DMA setup input setup
     DMA_CPAR4 = (uint32_t)(&SPI2_DR);
     DMA_CMAR4 = (uint32_t)(inBuffer);
     DMA_CNDTR4 = SPIIO_BUFFER_SIZE;
@@ -70,6 +70,54 @@ uint16_t SPIIO_video_pop()
 
 void SPIIO_cpu_init()
 {
+    //Set PB15, PB13 (MOSI, SCK) as AF outputs; PB12 as gpio output
+    //TODO do in one operation to avoid glitches
+    GPIOB_CRH = (GPIOB_CRH & 0x0F00FFFF) | 0xB0B30000;
+    
+    //16 bit data frame, software slave management, internal slave select high, MSBFIRST, enable SPI, divide 36mhz peripheral clock by 2 for 18mbit, master mode, CPOL = 0, CPHA = 0
+    //SPI2_CR1 = 0b0000101101000100;
+    SPI2_CR1 = 0b0000101101111100;//TESTING slower clock that can be seen by logic analyzer
+    SPI2_CR2 = 0b00000010;//DMA request on txe
+    
+    //DMA setup input setup
+    //TODO
+    
+    //DMA setup output setup
+    DMA_CPAR5 = (uint32_t)(&SPI2_DR);
+    DMA_CMAR5 = (uint32_t)(outBuffer);
+    //Med priority, 16 bit memory and peripheral transfers, memory increment, write to peripheral
+    //DMA_CCR5 = 0b0001010110010000;//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
+    (*(volatile uint32_t*)(0x40020058)) = 0b0001010110010000;//TESTING//Causes asynchronous fault that causes a hard fault
+    
+    //TODO wait for positive edge from video mcu to signal it is ready
+}
+
+bool SPIIO_cpu_full()//If out buffer is full
+{
+    return outPointer >= SPIIO_BUFFER_SIZE;
+}
+
+void SPIIO_cpu_push(uint16_t data)//Only call this if SPIIO_cpu_full() is false
+{
+    outBuffer[outPointer] = data;
+    ++outPointer;
+}
+
+void SPIIO_cpu_flush()
+{
+    //TODO provide block function
+    //DMA_CCR5 &= ~1;//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
+    (*(volatile uint32_t*)(0x40020058)) &= ~1;//TESTING//Causes asynchronous fault that causes a hard fault
+    //(*(volatile uint32_t*)(0x40020058)) = 0b0001010110010000;//Causes asynchronous fault that causes a hard fault
+    
+    //DMA_CNDTR5 = outPointer;
+    (*(volatile uint32_t*)(0x4002005C)) = outPointer;
+    
+    //DMA_CCR5 |= 1;//Enable//TODO why does this cause an interrupt to fire?*********************************************************************************************************************
+    (*(volatile uint32_t*)(0x40020058)) |= 1;//TESTING//Causes asynchronous fault that causes a hard fault
+    //(*(volatile uint32_t*)(0x40020058)) = 0b0001010110010001;//Causes asynchronous fault that causes a hard fault
+    
+    outPointer = 0;//TODO only reset this after dma finishes/allow pushes during flush
 }
 
 /*
@@ -89,3 +137,5 @@ __attribute__ ((interrupt ("IRQ"))) void __ISR_EXTI0()
 {
     recievedEXTIInterrupt = true;//Got an interrupt
 }*/
+
+__attribute__ ((interrupt ("IRQ"))) void __ISR_HardFault() { while (true); }
