@@ -4,10 +4,11 @@
 #include "spiio.h"
 
 static const uint8_t* frameBuffer;//Pointer to framebuffer
+static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
 
 static uint_fast16_t xPosition = 200;//Pixels
 static uint_fast16_t yPosition = 32;//Pixels
-static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
+static uint_fast16_t scratch[8];
 
 static void processingLoop();
 static void handleCharacter(char character);
@@ -66,7 +67,7 @@ static void processingLoop()
                             }
                         }
                         case 2://String write (more efficient than individual character writes)
-                        {
+                        {//Ends when a null byte is encountered
                             char character = command & 0xFF;
                             if (character)
                             {
@@ -74,6 +75,21 @@ static void processingLoop()
                                 handleCharacter(character);
                             }
                             break;
+                        }
+                        case 3://Set x position
+                        {
+                            xPosition = command & 0x1FF;
+                            break;
+                        }
+                        case 4://Set y position
+                        {
+                            yPosition = command & 0x1FF;
+                            break;
+                        }
+                        case 5://Line draw from current position
+                        {
+                            scratch[0] = command & 0x1FF;//x destination
+                            multiCommand = 5;
                         }
                         default:
                         {
@@ -100,6 +116,17 @@ static void processingLoop()
                     else
                         multiCommand = 0;
                     
+                    break;
+                }
+                case 5://Line draw from current position
+                {
+                    uint32_t destYPos = command & 0x1FF;
+                    SR_drawLine(xPosition, yPosition, scratch[0], destYPos);
+                    multiCommand = 0;
+                    
+                    //Set new current location
+                    xPosition = scratch[0];
+                    yPosition = destYPos;
                     break;
                 }
             }
