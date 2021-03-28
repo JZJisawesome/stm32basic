@@ -85,6 +85,46 @@ void SR_drawPoint_X(uint32_t x, uint32_t y)
     *destination ^= bitmask;//Xor bit in byte
 }
 
+/* Screen Manipulation */
+void SR_clear()
+{
+    //TODO replace with memset
+    for (uint32_t i = 0; i < (SR_BYTES_PER_LINE * SR_LINES); ++i)
+    {
+        uint8_t* bytePTR = fb + i;
+        *bytePTR = 0x00;
+    }
+}
+
+void SR_fill()
+{
+    //TODO replace with memset
+    for (uint32_t i = 0; i < (SR_BYTES_PER_LINE * SR_LINES); ++i)
+    {
+        uint8_t* bytePTR = fb + i;
+        *bytePTR = 0xFF;
+    }
+}
+
+void SR_scrollUp(uint32_t amount)
+{
+    assert(amount != 0);
+    
+    uint32_t amountBytes = (amount * SR_BYTES_PER_LINE);
+    
+    for (uint32_t i = amountBytes; i < (SR_BYTES_PER_LINE * SR_LINES); ++i)
+    {
+        uint8_t* sourcePTR = fb + i;
+        uint8_t* destinationPTR = sourcePTR - amountBytes;
+        *destinationPTR = *sourcePTR;
+    }
+}
+
+void SR_scrollDown(uint32_t amount)
+{
+    
+}
+
 /* Character Drawing */
 void SR_drawCharByByte(uint32_t xByte, uint32_t y, char c)
 {

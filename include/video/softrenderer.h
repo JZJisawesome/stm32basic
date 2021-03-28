@@ -10,7 +10,10 @@
  *  void SR_setCharacterRom(const uint8_t characterRom[128][8]);//8x8 and in ASCII order; W on B
  * 
  * Screen Manipulation
- *  //TODO
+ *  void SR_clear();
+ *  void SR_fill();
+ *  void SR_scrollUp(uint32_t amount);
+ *  void SR_scrollDown(uint32_t amount);
  * 
  * Point Drawing
  *  void SR_writeToByte(uint32_t xByte, uint32_t y, uint8_t data);//No Suffixes
@@ -68,6 +71,10 @@ void SR_drawPoint_I(uint32_t x, uint32_t y);
 void SR_drawPoint_X(uint32_t x, uint32_t y);
 
 //Screen Manipulation
+void SR_clear();
+void SR_fill();
+void SR_scrollUp(uint32_t amount);
+void SR_scrollDown(uint32_t amount);
 //TODO implement memset in bluepill.h
 //#define SR_clear(fb) {memset(fb, 0x00, BYTES_PER_LINE * LINES);}
 //#define SR_fill(fb) {memset(fb, 0xFF, BYTES_PER_LINE * LINES);}

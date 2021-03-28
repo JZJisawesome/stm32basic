@@ -1,4 +1,3 @@
-#include "spibus.h"
 #include "bluepill.h"
 #include "spiio.h"
 
@@ -20,7 +19,7 @@ void main()
     }
     */
     
-    __delayInstructions(47202999);//TODO instead of delaying, have SPIIO_cpu_init block until video mcu is ready
+    //__delayInstructions(47202999);//TODO instead of delaying, have SPIIO_cpu_init block until video mcu is ready
     SPIIO_cpu_init();
     
     const char* testString = "CPU MCU Initialized\n";
@@ -33,6 +32,13 @@ void main()
             SPIIO_cpu_push(*(testString++));
     }
     SPIIO_cpu_flush();
+    
+    __delayInstructions(47202999);
+    SPIIO_cpu_push((1 << 9) | 2);
+    SPIIO_cpu_flush();
+    __delayInstructions(47202999);
+    
+    //while (true);//TESTING
     
     while (true)
     {

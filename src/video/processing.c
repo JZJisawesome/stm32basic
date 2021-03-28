@@ -1,19 +1,23 @@
 #include "processing.h" 
 #include "bluepill.h"
 #include "softrenderer.h"
-#include "fifo.h"
-#include "spibus.h"
 #include "spiio.h"
+
+static const uint8_t* frameBuffer;//Pointer to framebuffer
 
 static uint_fast16_t xPosition = 200;//Pixels
 static uint_fast16_t yPosition = 32;//Pixels
+static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
 
 static void processingLoop();
 static void handleCharacter(char character);
 static void incrementCharacterPosition();
 
-void Processing_begin()
+void Processing_begin(const uint8_t* fb)
 {
+    //Store pointer to framebuffer
+    frameBuffer = fb;
+    
     processingLoop();
 }
 
@@ -28,16 +32,74 @@ static void processingLoop()
         {
             uint16_t command = SPIIO_video_pop();
             
-            switch (command >> 9)//Look at bits [15:9] for the command to execute
+            switch (multiCommand)
             {
-                case 0://0 was chosen because it means that a character can just be sent as is from the CPU
+                case 0://Not in the middle of a multi command command; parse normally
                 {
-                    //NOTE: Command bits [9:7] may have additional info that can be used
-                    handleCharacter(command & 0x7F);
+                    switch (command >> 9)//Look at bits [15:9] for the command to execute
+                    {
+                        case 0://Character write
+                        {//0 was chosen because it means that a character can just be sent as is from the CPU
+                            //NOTE: Command bits [9:7] may have additional info that can be used
+                            handleCharacter(command & 0x7F);
+                            break;
+                        }
+                        case 1://Screen operation
+                        {
+                            switch (command & 0x1FF)
+                            {
+                                case 0:
+                                {
+                                    SR_clear();
+                                    break;
+                                }
+                                case 1:
+                                {
+                                    SR_fill();
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    SR_scrollUp(8);
+                                    break;
+                                }
+                            }
+                        }
+                        case 2://String write (more efficient than individual character writes)
+                        {
+                            char character = command & 0xFF;
+                            if (character)
+                            {
+                                multiCommand = 2;
+                                handleCharacter(character);
+                            }
+                            break;
+                        }
+                        default:
+                        {
+                            break;
+                        }
+                    }
                     break;
                 }
-                default:
+                case 2://String write (more efficient than individual character writes)
                 {
+                    char character = command & 0xFF;//Low 8 bits
+                    if (character)//Check for null byte
+                    {
+                        handleCharacter(character);
+                        
+                        character = command >> 8;//Upper 8 bits
+                        if (character)//Check for null byte
+                        {
+                            handleCharacter(character);
+                        }
+                        else
+                            multiCommand = 0;
+                    }
+                    else
+                        multiCommand = 0;
+                    
                     break;
                 }
             }
@@ -50,6 +112,11 @@ static void handleCharacter(char character)
     switch (character)
     {
         //TODO ensure the special cases work correctly and have proper bounds checking
+        case 0x00:
+        {
+            //Just ignore a null character
+            break;
+        }
         case 0x01://Move up
         {
             yPosition -= 8;
@@ -98,9 +165,8 @@ static void handleCharacter(char character)
         }
         case 0x0C://Form feed
         {
-            //commented out for testing
-            //xPosition = 8;
-            //yPosition = 8;
+            xPosition = 8;
+            yPosition = 8;
             break;
         }
         case 0x7F://Delete

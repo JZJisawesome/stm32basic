@@ -1,7 +1,6 @@
 #include "composite.h"
 #include "softrenderer.h"
 #include "vincent.h"//8x8 Font
-#include "spibus.h"
 #include "processing.h"
 #include "spiio.h"
 
@@ -43,7 +42,6 @@ void main()
     SPIIO_video_init();//Should be last thing to initialize
     
     SR_drawText(1, 32, "Video MCU Initialized : ");
-    //Signal to the cpu that we are ready at this point
     
-    Processing_begin();//Never exits
+    Processing_begin((uint8_t*)ramFB);//Never exits
 }
