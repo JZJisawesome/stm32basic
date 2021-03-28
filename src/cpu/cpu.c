@@ -1,8 +1,6 @@
 #include "bluepill.h"
-#include "spiio.h"
 #include "vhal.h"
-
-void printString(const char* string);
+#include "spiio_cpu.h"
 
 void main()
 {
@@ -22,6 +20,8 @@ void main()
     }
     */
     
+    GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;
+    
     //__delayInstructions(47202999);//TODO instead of delaying, have SPIIO_cpu_init block until video mcu is ready
     SPIIO_cpu_init();
     
@@ -29,15 +29,20 @@ void main()
     VHAL_drawText("????? basic bytes free :)\n");
     //VHAL_flush();
     
-    __delayInstructions(4720299);//TESTING
+    //__delayInstructions(47202990);//TESTING
     
-    //VHAL_drawLineTo(300, 200);
-    //VHAL_drawLineTo(150, 100);
+    VHAL_drawLineTo(300, 200);
+    VHAL_drawLineTo(150, 100);
+    VHAL_flush();
     //VHAL_clear();
+    /*
+    GPIOC_BSRR = 1 << 13;
     for (uint32_t i = 0; i < 256; ++i)
         VHAL_drawLine_atPos(0, 0, 400, i);
     
     VHAL_flush();
+    GPIOC_BRR = 1 << 13;
+    */
     
     /*
     __delayInstructions(47202999);
@@ -77,42 +82,4 @@ void main()
     }
     
     return;//Temporary
-}
-
-void printString(const char* string)
-{
-    char character = *string;
-    if (character)
-    {
-        while (SPIIO_cpu_full()) { SPIIO_cpu_flush(); }
-        
-        SPIIO_cpu_push((2 << 9) | character);//First character is sent along with string write command
-        
-        while (true)
-        {
-            uint16_t command;
-            ++string;
-            character = *string;
-            
-            command = character;
-            
-            if (!character)
-            {
-                while (SPIIO_cpu_full()) { SPIIO_cpu_flush(); }
-                SPIIO_cpu_push(command);
-                break;
-            }
-            
-            ++string;
-            character = *string;
-            
-            command |= character << 8;
-            
-            while (SPIIO_cpu_full()) { SPIIO_cpu_flush(); }
-            SPIIO_cpu_push(command);
-            
-            if (!character)
-                break;
-        }
-    }
 }

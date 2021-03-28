@@ -5,7 +5,7 @@
 #include "spiio.h"
 
 //Flushing
-#define VHAL_flush() do {SPIIO_cpu_flush();} while (0)
+#define VHAL_flush() do {SPIIO_flush();} while (0)
 
 //Screen Manipulation
 void VHAL_scrollUp();

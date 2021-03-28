@@ -1,31 +1,31 @@
 #include "vhal.h" 
 
 #include "bluepill.h"
-#include "spiio.h"
+#include "spiio_cpu.h"
 
 //Screen Manipulation
 void VHAL_clear()
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((1 << 9) | 0);//Screen manipulation command 0: clear
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((1 << 9) | 0);//Screen manipulation command 0: clear
 }
 
 void VHAL_fill()
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((1 << 9) | 1);//Screen manipulation command 1: fill
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((1 << 9) | 1);//Screen manipulation command 1: fill
 }
 
 void VHAL_scrollUp()
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((1 << 9) | 2);//Screen manipulation command 2: scroll up
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((1 << 9) | 2);//Screen manipulation command 2: scroll up
 }
 
 void VHAL_scrollDown()
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((1 << 9) | 3);//Screen manipulation command 3: scroll down
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((1 << 9) | 3);//Screen manipulation command 3: scroll down
 }
 
 //Text/Character drawing
@@ -40,8 +40,8 @@ void VHAL_drawText(const char* string)
     char character = *string;
     if (character)//String does not start with a null byte
     {
-        SPIIO_cpu_smartBlockingFlush();
-        SPIIO_cpu_push((2 << 9) | character);//First character is sent along with string write command
+        SPIIO_smartBlockingFlush();
+        SPIIO_push((2 << 9) | character);//First character is sent along with string write command
         
         while (true)
         {
@@ -53,8 +53,8 @@ void VHAL_drawText(const char* string)
             
             if (!character)
             {
-                SPIIO_cpu_smartBlockingFlush();
-                SPIIO_cpu_push(command);
+                SPIIO_smartBlockingFlush();
+                SPIIO_push(command);
                 break;
             }
             
@@ -63,8 +63,8 @@ void VHAL_drawText(const char* string)
             
             command |= character << 8;
             
-            SPIIO_cpu_smartBlockingFlush();
-            SPIIO_cpu_push(command);
+            SPIIO_smartBlockingFlush();
+            SPIIO_push(command);
             
             if (!character)//We do this here because we still have to send the null byte to 
                 break;//let the video mcu know the string has ended
@@ -81,17 +81,17 @@ void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 
 void VHAL_drawLineTo(uint16_t x, uint16_t y)
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((5 << 9) | x);//Start multi command transfer of line coords and send x
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push(y);//End with sending y coordinate
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((5 << 9) | x);//Start multi command transfer of line coords and send x
+    SPIIO_smartBlockingFlush();
+    SPIIO_push(y);//End with sending y coordinate
 }
 
 //Position management
 void VHAL_setPos(uint16_t x, uint16_t y)
 {
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((3 << 9) | x);//Set x position
-    SPIIO_cpu_smartBlockingFlush();
-    SPIIO_cpu_push((4 << 9) | y);//Set y position
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((3 << 9) | x);//Set x position
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((4 << 9) | y);//Set y position
 }
