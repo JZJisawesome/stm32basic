@@ -1,4 +1,9 @@
 #include "basi.h" 
+
+#include "bluepill.h"
+#include "ps2.h"
+#include "vhal.h"
+
 //TODO create PS/2 keyboard code ps2.c and ps2.h with buffer; filled by interrupts on edges of clock sent by keyboard
 //Then this code can poll isEmpty and wait for it to be false, then interpret the key that was pressed
 

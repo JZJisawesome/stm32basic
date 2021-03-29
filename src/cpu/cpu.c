@@ -2,12 +2,16 @@
 #include "vhal.h"
 #include "spiio_cpu.h"
 #include "basi.h"
+#include "ps2.h"
 
 void main()
 {
     //TODO First thing to print should be "CPU MCU Initialized" (at 25, 32), then # of free basic bytes (at 1, 40)
     
-    GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;
+    GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;//TESTING for led
+    
+    PS2_init();
+    
     SPIIO_cpu_init();
     BASIC_init();
     
@@ -26,7 +30,7 @@ void main()
     
     //__delayInstructions(47202990);//TESTING
     
-    GPIOC_BSRR = 1 << 13;
+    //GPIOC_BSRR = 1 << 13;
     VHAL_drawLineTo(300, 200);
     VHAL_drawLineTo(150, 100);
     VHAL_drawRectangle(10, 10);
@@ -34,7 +38,7 @@ void main()
     VHAL_drawCircle(10);
     VHAL_drawTriangle_atPos(200, 0, 0, 250, 400, 250);
     VHAL_drawCircle_atPos(100, 100, 25);
-    GPIOC_BRR = 1 << 13;
+    //GPIOC_BRR = 1 << 13;
     VHAL_flush();
     //VHAL_clear();
     /*
@@ -57,6 +61,7 @@ void main()
     
     while (true)
     {
+        VHAL_flush();
         /*
         __delayInstructions(4720299);//TESTING
         //__delayInstructions(4720);//TESTING
