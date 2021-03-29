@@ -140,3 +140,15 @@ void VHAL_drawTriangle(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
     SPIIO_smartBlockingFlush();
     SPIIO_push(y2);
 }
+
+void VHAL_drawCircle_atPos(uint32_t x, uint32_t y, uint32_t radius)
+{
+    VHAL_setPos(x, y);
+    VHAL_drawCircle(radius);
+}
+
+void VHAL_drawCircle(uint32_t radius)
+{
+    SPIIO_smartBlockingFlush();
+    SPIIO_push((10 << 9) | radius);
+}

@@ -169,6 +169,11 @@ static void handleSingleCommand(uint16_t command)
             multiCommand = 9;
             break;
         }
+        case 10:
+        {
+            SR_drawCircle(xPosition, yPosition, command & 0x1FF);
+            break;
+        }
         default:
         {
             break;

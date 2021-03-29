@@ -35,7 +35,7 @@
  *  void SR_drawRectangleByByte(uint32_t xByte, uint32_t y, uint32_t xCount, uint32_t yCount);
  *  void SR_drawRectangle(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount);
  *  void SR_drawTriangle(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);//No Suffixes//TODO
- *  
+ *  void SR_drawCircle(uint32_t x, uint32_t y, uint32_t radius);//No Suffixes//TODO
 */
 
 #ifndef SOFTRENDERER_H
@@ -126,6 +126,7 @@ void SR_drawTriangle(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_
 
 void SR_drawCircleByByte(uint32_t xByte, uint32_t y, uint32_t radius);
 void SR_drawCircleByByte_F(uint32_t xByte, uint32_t y, uint32_t radius);
+void SR_drawCircle(uint32_t x, uint32_t y, uint32_t radius);
 
 /* Public Functions Called By Public Macros */
 //Costs performance, but improves maintainability

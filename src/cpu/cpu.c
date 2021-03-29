@@ -35,6 +35,8 @@ void main()
     VHAL_drawLineTo(150, 100);
     VHAL_drawRectangle(10, 10);
     VHAL_drawTriangle(100, 50, 400, 250);
+    VHAL_drawTriangle_atPos(200, 0, 0, 250, 400, 250);
+    VHAL_drawCircle_atPos(100, 100, 25);
     VHAL_flush();
     //VHAL_clear();
     /*

@@ -368,6 +368,7 @@ void SR_drawTriangle(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_
 void SR_drawCircleByByte(uint32_t xByte, uint32_t y, uint32_t radius)
 {
     //https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+    
     //TODO
 }
 
@@ -375,6 +376,63 @@ void SR_drawCircleByByte_F(uint32_t xByte, uint32_t y, uint32_t radius)
 {
     //TODO
 
+}
+
+void SR_drawCircle(uint32_t x, uint32_t y, uint32_t radius)
+{
+    //https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+    //https://www.geeksforgeeks.org/mid-point-circle-drawing-algorithm/
+    //TODO figure out why things are ovals
+    //TODO understand how this works; comments below are from me
+    //Figure out //?
+    
+    assert(radius > 0);
+    
+    //Coordinates relative to 0, 0
+    uint32_t currentX = radius;//?
+    uint32_t currentY = 0;//?
+    
+    //Draw points along axes
+    SR_drawPoint(x + currentX, y);//Rightmost pixel
+    SR_drawPoint(x - currentX, y);//Leftmost pixel
+    SR_drawPoint(y, x + currentX);//Highest pixel
+    SR_drawPoint(y, x - currentX);//Lowest pixel
+    
+    int32_t midpoint = 1 - radius;//?
+    while (currentX > currentY)//?
+    {
+        //Determine coordinates to plot in octant 1
+        
+        ++currentY;//We move up one pixel each time
+        
+        if (midpoint <= 0)//?
+            midpoint += (2 * currentY) + 1;//?
+        else
+        {
+            --currentX;//?
+            midpoint += (2 * currentY) - (2 * currentX) + 1;//?
+        }
+        
+        if (currentX < currentY)//?
+            break;
+        
+        //Draw points based on new coordinates
+        
+        SR_drawPoint(x + currentX, y + currentY);//Octant 1
+        SR_drawPoint(x - currentX, y + currentY);//Octant 4
+        SR_drawPoint(x + currentX, y - currentY);//Octant 8
+        SR_drawPoint(x - currentX, y - currentY);//Octant 5
+        
+        //The if statement here isn't needed, but it saves time; TODO figure out why
+        //Something to do with not needing to generate points that overlap
+        if (currentX != currentY)//?
+        {
+            SR_drawPoint(x + currentY, y + currentX);//Octant 2
+            SR_drawPoint(x - currentY, y + currentX);//Octant 3
+            SR_drawPoint(x + currentY, y - currentX);//Octant 7
+            SR_drawPoint(x - currentY, y - currentX);//Octant 6
+        }
+    }
 }
 
 

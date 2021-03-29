@@ -3,6 +3,9 @@
 
 //TODO if possible do pointer chacing like in spiio_video instead of two buffers that are half the size
 //More efficient that way
+//Ex. maybe have pointer chase dma counter and consider both going past it and the 64 entry threshold as full
+//That way dma transfers don't need to wrap maybe?
+//IDK
 
 #define HALF_BUFFER_SIZE (SPIIO_CPU_BUFFER_SIZE / 2)
 
