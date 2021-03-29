@@ -1,42 +1,40 @@
 #include "bluepill.h"
 #include "vhal.h"
 #include "spiio_cpu.h"
+#include "basi.h"
 
 void main()
 {
-    //First thing to print should be "CPU MCU Initialized" (at 25, 32), then # of free basic bytes (at 1, 40)
-    /*
-    SPIBus_init_CPU();
-    
-    //TESTING
-    uint8_t i = 0;
-    while (true)
-    {
-        //__delayInstructions(50);//For stress testings
-        __delayInstructions(4720299);//About 1 second
-        SPIBus_transfer_CPU(i);
-        
-        ++i;
-    }
-    */
+    //TODO First thing to print should be "CPU MCU Initialized" (at 25, 32), then # of free basic bytes (at 1, 40)
     
     GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;
-    
-    //__delayInstructions(47202999);//TODO instead of delaying, have SPIIO_cpu_init block until video mcu is ready
     SPIIO_cpu_init();
+    BASIC_init();
     
     VHAL_drawText("CPU MCU Initialized\n");
+    VHAL_flush();//So that the basic interpreter has a nice clean buffer to work with
+    
+    BASIC_begin();//Begin basic interpreter (never exits)
+    
+    
+    
+    
+    //TESTING
+    
     VHAL_drawText("????? basic bytes free :)\n");
     //VHAL_flush();
     
     //__delayInstructions(47202990);//TESTING
     
+    GPIOC_BSRR = 1 << 13;
     VHAL_drawLineTo(300, 200);
     VHAL_drawLineTo(150, 100);
     VHAL_drawRectangle(10, 10);
     VHAL_drawTriangle(100, 50, 400, 250);
+    VHAL_drawCircle(10);
     VHAL_drawTriangle_atPos(200, 0, 0, 250, 400, 250);
     VHAL_drawCircle_atPos(100, 100, 25);
+    GPIOC_BRR = 1 << 13;
     VHAL_flush();
     //VHAL_clear();
     /*

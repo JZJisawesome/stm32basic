@@ -32,7 +32,7 @@ static void processingLoop()
     {
         if (SPIIO_empty())
             //__wfi();
-            ((void)0);//TESTING Debugging dies if this is wfi; change to wfi at end of development
+            ((void)0);//TESTING Debugging dies if this is wfi; change to wfi at end of development if possible
         else
         {
             uint16_t command = SPIIO_pop();
