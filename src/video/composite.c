@@ -71,8 +71,8 @@ static volatile uint_fast16_t step = -1;//0 to 540
 #define enableDMA() do {DMA_CCR3 = DMA_ENABLE;} while(0)//Enable DMA (transfer will begin b/c TXE==1)
 #define disableVideo() do {disableSPI(); disableDMA();} while(0)
 #define enableVideo() do {enableSPI(); enableDMA();} while(0)
-#define syncEnable() do {GPIOB_BRR = 1 << 9;} while(0)//Pull PB9 low
-#define syncDisable() do {GPIOB_BSRR = 1 << 9;} while(0)//Pull PB9 high
+#define syncEnable() do {GPIOA_BRR = 1 << 6;} while(0)//Pull PA6 low
+#define syncDisable() do {GPIOA_BSRR = 1 << 6;} while(0)//Pull PA7 high
 
 /* Public Functions */
 
@@ -82,8 +82,7 @@ void Composite_init(const uint8_t* fb)//Pointer to framebuffer
     frameBuffer = fb;
     
     //Pin Configuration
-    GPIOA_CRL = (GPIOA_CRL & 0x0FFFFFFF) | 0xB0000000;//PA7 as 50mhz AF push-pull output
-    GPIOB_CRH = (GPIOB_CRH & 0xFFFFFF0F) | 0x00000030;//PB9 as 50mhz push-pull output
+    GPIOA_CRL = (GPIOA_CRL & 0x00FFFFFF) | 0xB3000000;//PA7 as 50mhz AF push-pull output; PA6 as as 50mhz push-pull output
     
     //SPI Configuration
     SPI1_CR1 = SPI_DISABLE;
@@ -189,7 +188,7 @@ __attribute__ ((interrupt ("IRQ"))) void __ISR_TIM4()
                 #endif
                 
                 //Set initial DMA memory address based on frame buffer pointer and offset
-                const uint8_t const* lineAddress = frameBuffer + offset;
+                const uint8_t* lineAddress = frameBuffer + offset;
                 DMA_CMAR3 = (uint32_t)lineAddress;
             }
             
