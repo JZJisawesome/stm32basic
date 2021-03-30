@@ -12,7 +12,7 @@ INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
 LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
 #TODO seperate out into common deps, cpu deps, and video deps
-DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/common/fifo.h $(INCDIR)/common/spibus.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)

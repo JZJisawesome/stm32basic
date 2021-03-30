@@ -2,7 +2,7 @@
 #define VHAL_H
 
 #include "bluepill.h"
-#include "spiio.h"
+#include "spiio_cpu.h"
 
 //Flushing (can save time if a draw call would otherwise stall)
 #define VHAL_flush() do {SPIIO_flush();} while (0)
