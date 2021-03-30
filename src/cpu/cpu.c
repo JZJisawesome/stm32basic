@@ -58,10 +58,31 @@ void main()
     */
     
     //while (true);//TESTING
-    
+    VHAL_clear();
+    VHAL_setPos(8, 8);
     while (true)
     {
-        VHAL_flush();
+        if (!PS2_empty())
+        {
+            char character = PS2_pop();
+            /*
+            char numString[4];
+            numString[3] = 0x00;//Null byte
+            numString[2] = '0' + (character % 10);//1s place
+            numString[1] = '0' + ((character / 10) % 10);//10s place
+            numString[0] = '0' + ((character / 100) % 10);//100s place
+            VHAL_drawText(numString);
+            VHAL_flush();
+            */
+            
+            if ((character != 0xE0) && (character != 0xF0))
+            {
+                VHAL_drawChar(PS2_toAscii(character, false));
+                VHAL_flush();
+            }
+            
+        }
+        //VHAL_flush();
         /*
         __delayInstructions(4720299);//TESTING
         //__delayInstructions(4720);//TESTING

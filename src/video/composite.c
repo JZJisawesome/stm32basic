@@ -71,8 +71,8 @@ static volatile uint_fast16_t step = -1;//0 to 540
 #define enableDMA() do {DMA_CCR3 = DMA_ENABLE;} while(0)//Enable DMA (transfer will begin b/c TXE==1)
 #define disableVideo() do {disableSPI(); disableDMA();} while(0)
 #define enableVideo() do {enableSPI(); enableDMA();} while(0)
-#define syncEnable() do {GPIOB_BRR = 1 << 8;} while(0)//Pull PB8 low
-#define syncDisable() do {GPIOB_BSRR = 1 << 8;} while(0)//Pull PB8 high
+#define syncEnable() do {GPIOB_BRR = 1 << 9;} while(0)//Pull PB9 low
+#define syncDisable() do {GPIOB_BSRR = 1 << 9;} while(0)//Pull PB9 high
 
 /* Public Functions */
 
@@ -83,7 +83,7 @@ void Composite_init(const uint8_t* fb)//Pointer to framebuffer
     
     //Pin Configuration
     GPIOA_CRL = (GPIOA_CRL & 0x0FFFFFFF) | 0xB0000000;//PA7 as 50mhz AF push-pull output
-    GPIOB_CRH = (GPIOB_CRH & 0xFFFFFFF0) | 0x00000003;//PB8 as 50mhz push-pull output
+    GPIOB_CRH = (GPIOB_CRH & 0xFFFFFF0F) | 0x00000030;//PB9 as 50mhz push-pull output
     
     //SPI Configuration
     SPI1_CR1 = SPI_DISABLE;
