@@ -1,4 +1,4 @@
-//PB3 is clock, PB4 is data
+//PB4 is clock, PB7 is data
 #ifndef PS2_H
 #define PS2_H
 
