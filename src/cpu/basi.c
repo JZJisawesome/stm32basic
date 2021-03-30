@@ -19,10 +19,10 @@ typedef struct
 
 void BASIC_init()//Init data structures
 {
-    
+    //TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
 }
 
 void BASIC_begin()//Begin basic interpreter
 {
-    
+    //TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
 }

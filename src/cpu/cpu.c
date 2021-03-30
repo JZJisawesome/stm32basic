@@ -4,6 +4,8 @@
 #include "basi.h"
 #include "ps2.h"
 
+//TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
+
 void main()
 {
     //TODO First thing to print should be "CPU MCU Initialized" (at 25, 32), then # of free basic bytes (at 1, 40)
@@ -60,6 +62,7 @@ void main()
     //while (true);//TESTING
     VHAL_clear();
     VHAL_setPos(8, 8);
+    bool capital = false;
     while (true)
     {
         if (!PS2_empty())
@@ -77,8 +80,9 @@ void main()
             
             if ((character != 0xE0) && (character != 0xF0))
             {
-                VHAL_drawChar(PS2_toAscii(character, false));
+                VHAL_drawChar(PS2_toAscii(character, capital));
                 VHAL_flush();
+                capital = !capital;
             }
             
         }

@@ -1,5 +1,5 @@
 #include "ps2.h"
-
+//TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
 #include "bluepill.h"
 
 static volatile uint8_t buffer[PS2_BUFFER_SIZE];
@@ -86,13 +86,115 @@ __attribute__ ((interrupt ("IRQ"))) void __ISR_EXTI4()//Fires every negative edg
 }
 
 char PS2_toAscii(uint16_t keyboardData, bool capital)
-{
+{//TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
     #if KEYBOARD_SET == 1
         if (capital)
         {
             switch (keyboardData)
             {
                 //TODO
+                /*
+                case 0x0E:
+                    return '
+                case 0x16: 
+                    return '
+                case 0x1E:
+                    return '
+                case 0x26:
+                    return '
+                case 0x25:
+                    return '
+                case 0x2E:
+                    return '
+                case 0x36:
+                    return '
+                case 0x3D:
+                    return '
+                case 0x3E:
+                    return '
+                case 0x46:
+                    return '
+                case 0x45:
+                    return '
+                case 0x4E:
+                    return '
+                case 0x55:
+                    return '
+                case 0x66:
+                    return '
+                case 0x0D:
+                    return '
+                case 0x15:
+                    return '
+                case 0x1D:
+                    return '
+                case 0x24:
+                    return '
+                case 0x2D:
+                    return '
+                case 0x2C:
+                    return '
+                case 0x35:
+                    return '
+                case 0x3C:
+                    return '
+                case 0x43:
+                    return '
+                case 0x44:
+                    return '
+                case 0x4D:
+                    return '
+                case 0x54:
+                    return '
+                case 0x5B:
+                    return '
+                case 0x1C:
+                    return '
+                case 0x1B:
+                    return '
+                case 0x23:
+                    return '
+                case 0x2B:
+                    return '
+                case 0x34:
+                    return '
+                case 0x33:
+                    return '
+                case 0x3B:
+                    return '
+                case 0x42:
+                    return '
+                case 0x4B:
+                    return '
+                case 0x4C:
+                    return '
+                case 0x52:
+                    return '
+                case 0x5A:
+                    return '
+                case 0x1A:
+                    return '
+                case 0x22:
+                    return '
+                case 0x21:
+                    return '
+                case 0x2A:
+                    return '
+                case 0x32:
+                    return '
+                case 0x31:
+                    return '
+                case 0x3A:
+                    return '
+                case 0x41:
+                    return '
+                case 0x49:
+                    return '
+                case 0x4A:
+                    return '
+                default:
+                    return keyboardData;
+                */
             }
         }
         else
@@ -100,24 +202,258 @@ char PS2_toAscii(uint16_t keyboardData, bool capital)
             switch (keyboardData)
             {
                 //TODO
+                /*
+                */
             }
         }
-    #else//Keyboard set 2
+    #elif KEYBOARD_SET == 2
         //https://techdocs.altium.com/display/FPGA/PS2+Keyboard+Scan+Codes
         if (capital)
         {
             switch (keyboardData)
             {
                 //TODO
+                /*
+                case 0x0E:
+                    return '
+                case 0x16: 
+                    return '
+                case 0x1E:
+                    return '
+                case 0x26:
+                    return '
+                case 0x25:
+                    return '
+                case 0x2E:
+                    return '
+                case 0x36:
+                    return '
+                case 0x3D:
+                    return '
+                case 0x3E:
+                    return '
+                case 0x46:
+                    return '
+                case 0x45:
+                    return '
+                case 0x4E:
+                    return '
+                case 0x55:
+                    return '
+                case 0x66:
+                    return '
+                case 0x0D:
+                    return '
+                case 0x15:
+                    return '
+                case 0x1D:
+                    return '
+                case 0x24:
+                    return '
+                case 0x2D:
+                    return '
+                case 0x2C:
+                    return '
+                case 0x35:
+                    return '
+                case 0x3C:
+                    return '
+                case 0x43:
+                    return '
+                case 0x44:
+                    return '
+                case 0x4D:
+                    return '
+                case 0x54:
+                    return '
+                case 0x5B:
+                    return '
+                case 0x1C:
+                    return '
+                case 0x1B:
+                    return '
+                case 0x23:
+                    return '
+                case 0x2B:
+                    return '
+                case 0x34:
+                    return '
+                case 0x33:
+                    return '
+                case 0x3B:
+                    return '
+                case 0x42:
+                    return '
+                case 0x4B:
+                    return '
+                case 0x4C:
+                    return '
+                case 0x52:
+                    return '
+                case 0x5A:
+                    return '
+                case 0x1A:
+                    return '
+                case 0x22:
+                    return '
+                case 0x21:
+                    return '
+                case 0x2A:
+                    return '
+                case 0x32:
+                    return '
+                case 0x31:
+                    return '
+                case 0x3A:
+                    return '
+                case 0x41:
+                    return '
+                case 0x49:
+                    return '
+                case 0x4A:
+                    return '
+                case 0x29:
+                    return ' ';
+                case 0x64:
+                    return 0x7F;//Delete
+                case 0x5D:
+                    return '|';
+                */
+                default:
+                    return keyboardData;
             }
         }
-        else
+        else//Lowercase
         {
             switch (keyboardData)
             {
-                
+                case 0x0E:
+                    return '`';
+                case 0x16: 
+                case 0x69:
+                    return '1';
+                case 0x1E:
+                case 0x72:
+                    return '2';
+                case 0x26:
+                case 0x7A:
+                    return '3';
+                case 0x25:
+                case 0x6B:
+                    return '4';
+                case 0x2E:
+                case 0x73:
+                    return '5';
+                case 0x36:
+                case 0x74:
+                    return '6';
+                case 0x3D:
+                case 0x6C:
+                    return '7';
+                case 0x3E:
+                case 0x75:
+                    return '8';
+                case 0x46:
+                case 0x7D:
+                    return '9';
+                case 0x45:
+                case 0x70:
+                    return '0';
+                case 0x4E:
+                case 0x7B:
+                    return '-';
+                case 0x55:
+                    return '=';
+                case 0x66:
+                    return 0x08;//Backspace
+                case 0x0D:
+                    return '\t';
+                case 0x15:
+                    return 'q';
+                case 0x1D:
+                    return 'w';
+                case 0x24:
+                    return 'e';
+                case 0x2D:
+                    return 'r';
+                case 0x2C:
+                    return 't';
+                case 0x35:
+                    return 'y';
+                case 0x3C:
+                    return 'u';
+                case 0x43:
+                    return 'i';
+                case 0x44:
+                    return 'o';
+                case 0x4D:
+                    return 'p';
+                case 0x54:
+                    return '[';
+                case 0x5B:
+                    return ']';
+                case 0x1C:
+                    return 'a';
+                case 0x1B:
+                    return 's';
+                case 0x23:
+                    return 'd';
+                case 0x2B:
+                    return 'f';
+                case 0x34:
+                    return 'g';
+                case 0x33:
+                    return 'h';
+                case 0x3B:
+                    return 'j';
+                case 0x42:
+                    return 'k';
+                case 0x4B:
+                    return 'l';
+                case 0x4C:
+                    return ';';
+                case 0x52:
+                    return '\'';
+                case 0x5A:
+                    return '\n';
+                case 0x1A:
+                    return 'z';
+                case 0x22:
+                    return 'x';
+                case 0x21:
+                    return 'c';
+                case 0x2A:
+                    return 'v';
+                case 0x32:
+                    return 'b';
+                case 0x31:
+                    return 'n';
+                case 0x3A:
+                    return 'm';
+                case 0x41:
+                    return ',';
+                case 0x49:
+                    return '.';
+                case 0x4A:
+                case 0x77:
+                    return '/';
+                case 0x29:
+                    return ' ';
+                case 0x7C:
+                    return '*';
+                case 0x71:
+                    return '.';
+                case 0x79:
+                    return '+';
+                case 0x64:
+                    return 0x7F;//Delete
+                case 0x5D:
+                    return '\\';
+                default:
+                    return keyboardData;
             }
         }
+    #else//Keyboard set 3
+        //TODO (note: lots can be copied from set 2)
     #endif
-    //Will return garbage if the keyboardData does not translate to ascii
 }
