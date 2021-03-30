@@ -9,11 +9,8 @@ static uint16_t pointer = 0;//Software pointer (not DMA pointer)
 
 void SPIIO_video_init()
 {
-    //Set PA1 as push-pull gpio output and leave PA0 as input
-    GPIOA_CRL = (GPIOA_CRL & 0xFFFFFF0F) | 0x00000030;
-    
-    //Set PB14 (MISO) as AF output
-    GPIOB_CRH = (GPIOB_CRH & 0xF0FFFFFF) | 0x0B000000;
+    //Set PB14 as gpio output
+    GPIOB_CRH = (GPIOB_CRH & 0xF0FFFFFF) | 0x03000000;
     
     //16 bit data frame, hardware slave management, MSBFIRST, enable SPI, slave mode, CPOL = 0, CPHA = 0
     SPI2_CR1 = 0b0000100001000000;
@@ -26,7 +23,7 @@ void SPIIO_video_init()
     //Med priority, 16 bit memory and peripheral transfers, memory increment, circular mode, read from peripheral, enable channel
     DMA_CCR4 = 0b0001010110100001;
     
-    GPIOA_BSRR = 1 << 1;//Set PA1 high to signal to cpu that we're ready
+    GPIOB_BSRR = 1 << 14;//Set PB14 high to signal to cpu that we're ready
 }
 
 bool SPIIO_empty()//If buffer is empty

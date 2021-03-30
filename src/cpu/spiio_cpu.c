@@ -18,11 +18,9 @@ static bool dmaBufferFirstHalf = true;//Next half of buffer to transfer will be 
 
 void SPIIO_cpu_init()
 {
-    //Set PA1 as push-pull gpio output and leave PA0 as input
-    GPIOA_CRL = (GPIOA_CRL & 0xFFFFFF0F) | 0x00000030;
-    
-    //Set PB15, PB13 (MOSI, SCK) as AF outputs; PB12 as gpio output
-    GPIOB_CRH = (GPIOB_CRH & 0x0F00FFFF) | 0xB0B30000;
+    //Set PB15, PB13 (MOSI, SCK) as AF outputs; PB12 (NSS) as gpio output; PB14 as gpio input pulldown
+    GPIOB_BSRR = 1 << 12;//PB12 (NSS should start high)//NOTE: PB14 is pulldown by default
+    GPIOB_CRH = (GPIOB_CRH & 0x0000FFFF) | 0xB8B30000;
     
     //16 bit data frame, software slave management, internal slave select high, MSBFIRST, enable SPI, divide 36mhz peripheral clock by 2 for 18mbit, master mode, CPOL = 0, CPHA = 0
     SPI2_CR1 = 0b0000101101000100;
@@ -34,7 +32,8 @@ void SPIIO_cpu_init()
     //Med priority, 16 bit memory and peripheral transfers, memory increment, write to peripheral
     DMA_CCR5 = 0b0001010110010000;
     
-    while (!(GPIOA_IDR & 1));//Wait for video mcu to bring PA0 high
+    while (!(GPIOB_IDR & (1 << 14)));//Wait for video mcu to bring PB14 high
+    GPIOB_BRR = 1 << 12;//Now bring NSS (PB12) low 
 }
 
 bool SPIIO_full()//If out buffer is full

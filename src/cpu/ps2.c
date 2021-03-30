@@ -1,5 +1,7 @@
 #include "ps2.h"
 //TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
+//  Only send when pushed, and handle capatilization/multi byte keys and pack into 1 byte
+//  No need to use DMA, because a key will be processed and transfered over uart faster than another will arrive
 #include "bluepill.h"
 
 static volatile uint8_t buffer[PS2_BUFFER_SIZE];
