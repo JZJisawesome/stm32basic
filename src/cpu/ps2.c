@@ -212,113 +212,138 @@ char PS2_toAscii(uint16_t keyboardData, bool capital)
         {
             switch (keyboardData)
             {
-                //TODO
-                /*
                 case 0x0E:
-                    return '
+                    return '~';
                 case 0x16: 
-                    return '
+                    return '!';
                 case 0x1E:
-                    return '
+                    return '@';
                 case 0x26:
-                    return '
+                    return '#';
                 case 0x25:
-                    return '
+                    return '$';
                 case 0x2E:
-                    return '
+                    return '%';
                 case 0x36:
-                    return '
+                    return '^';
                 case 0x3D:
-                    return '
+                    return '&';
                 case 0x3E:
-                    return '
+                    return '*';
                 case 0x46:
-                    return '
+                    return '(';
                 case 0x45:
-                    return '
+                    return ')';
                 case 0x4E:
-                    return '
+                    return '_';
                 case 0x55:
-                    return '
+                    return '+';
                 case 0x66:
-                    return '
+                    return 0x08;//Backspace
                 case 0x0D:
-                    return '
+                    return '\t';
                 case 0x15:
-                    return '
+                    return 'Q';
                 case 0x1D:
-                    return '
+                    return 'W';
                 case 0x24:
-                    return '
+                    return 'E';
                 case 0x2D:
-                    return '
+                    return 'R';
                 case 0x2C:
-                    return '
+                    return 'T';
                 case 0x35:
-                    return '
+                    return 'Y';
                 case 0x3C:
-                    return '
+                    return 'U';
                 case 0x43:
-                    return '
+                    return 'I';
                 case 0x44:
-                    return '
+                    return 'O';
                 case 0x4D:
-                    return '
+                    return 'P';
                 case 0x54:
-                    return '
+                    return '{';
                 case 0x5B:
-                    return '
+                    return '}';
                 case 0x1C:
-                    return '
+                    return 'A';
                 case 0x1B:
-                    return '
+                    return 'S';
                 case 0x23:
-                    return '
+                    return 'D';
                 case 0x2B:
-                    return '
+                    return 'F';
                 case 0x34:
-                    return '
+                    return 'G';
                 case 0x33:
-                    return '
+                    return 'H';
                 case 0x3B:
-                    return '
+                    return 'J';
                 case 0x42:
-                    return '
+                    return 'K';
                 case 0x4B:
-                    return '
+                    return 'L';
                 case 0x4C:
-                    return '
+                    return ':';
                 case 0x52:
-                    return '
+                    return '"';
                 case 0x5A:
-                    return '
+                    return '\n';
                 case 0x1A:
-                    return '
+                    return 'Z';
                 case 0x22:
-                    return '
+                    return 'X';
                 case 0x21:
-                    return '
+                    return 'C';
                 case 0x2A:
-                    return '
+                    return 'V';
                 case 0x32:
-                    return '
+                    return 'B';
                 case 0x31:
-                    return '
+                    return 'N';
                 case 0x3A:
-                    return '
+                    return 'M';
                 case 0x41:
-                    return '
+                    return '<';
                 case 0x49:
-                    return '
+                    return '>';
                 case 0x4A:
-                    return '
+                    return '?';
                 case 0x29:
                     return ' ';
                 case 0x64:
                     return 0x7F;//Delete
+                case 0x6C:
+                    return '7';
+                case 0x6B:
+                    return '4';
+                case 0x69:
+                    return '1';
+                case 0x75:
+                    return '8';
+                case 0x73:
+                    return '5';
+                case 0x72:
+                    return '2';
+                case 0x70:
+                    return '0';
+                case 0x7C:
+                    return '*';
+                case 0x7D:
+                    return '9';
+                case 0x74:
+                    return '6';
+                case 0x7A:
+                    return '3';
+                case 0x71:
+                    return '.';
+                case 0x7B:
+                    return '-';
+                case 0x79:
+                    return '+';
                 case 0x5D:
                     return '|';
-                */
                 default:
                     return keyboardData;
             }
@@ -435,18 +460,17 @@ char PS2_toAscii(uint16_t keyboardData, bool capital)
                 case 0x49:
                     return '.';
                 case 0x4A:
-                case 0x77:
                     return '/';
                 case 0x29:
                     return ' ';
+                case 0x64:
+                    return 0x7F;//Delete
                 case 0x7C:
                     return '*';
                 case 0x71:
                     return '.';
                 case 0x79:
                     return '+';
-                case 0x64:
-                    return 0x7F;//Delete
                 case 0x5D:
                     return '\\';
                 default:
