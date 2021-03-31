@@ -31,7 +31,7 @@ void PS2UART_video_init()
     GPIOA_CRH = (GPIOA_CRH & 0xFFFFFF0F) | 0x000000B0;
     
     //Setup uart
-    USART1_BRR = 0x0010;//Set baud rate to 4.5mbit
+    USART1_BRR = 0x0020;//Set baud rate to 2.25mbit
     USART1_CR1 = 0b0010000000001000;//Enable uart (transmitter only, 8 data bits)
     
     //Initialize EXTI4 for PB4 for negative edges

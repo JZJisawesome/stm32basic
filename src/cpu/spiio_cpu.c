@@ -29,8 +29,8 @@ void SPIIO_cpu_init()
     
     //DMA setup output setup
     DMA_CPAR5 = (uint32_t)(&SPI2_DR);
-    //Med priority, 16 bit memory and peripheral transfers, memory increment, write to peripheral
-    DMA_CCR5 = 0b0001010110010000;
+    //Low (1/4) priority, 16 bit memory and peripheral transfers, memory increment, write to peripheral
+    DMA_CCR5 = 0b0000010110010000;
     
     while (!(GPIOB_IDR & (1 << 14)));//Wait for video mcu to bring PB14 high
     GPIOB_BRR = 1 << 12;//Now bring NSS (PB12) low 
