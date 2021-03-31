@@ -3,6 +3,8 @@
 #include "bluepill.h"
 #include "softrenderer.h"//TESTING
 
+//FIXME caps lock shouldn't apply to numbers
+
 static enum {START = -1, PARITY = 8, STOP = 9} state = START;//States 0 to 7 are bits 0 to 7
 static uint8_t byteBuffer;
 

@@ -183,6 +183,25 @@ void SR_drawCharByByte_X(uint32_t xByte, uint32_t y, char c)
     }
 }
 
+void SR_drawCharByByte_OW(uint32_t xByte, uint32_t y, char c)
+{
+    //Bounds checking
+    assert(xByte < SR_BYTES_PER_LINE);
+    assert(y < (SR_LINES - 8));
+    
+    //Copy character from charRom to fb. c is the offset into charRom
+    const uint8_t* charPointer = charRom + (c * 8);//Index into character rom
+    uint8_t* line = fb + (y * SR_BYTES_PER_LINE);//Address of first line to copy char to
+    for (uint32_t i = 0; i < 8; ++i)
+    {
+        uint8_t* const destination = line + xByte;//Index into the line
+        *destination = *charPointer;//Copy byte of character into the framebuffer;
+        
+        line += SR_BYTES_PER_LINE;//Go to the next line
+        ++charPointer;//Go to next line of character
+    }
+}
+
 void SR_drawStringByByte(uint32_t xByte, uint32_t y, const char* string)
 {
     while (true)
@@ -393,10 +412,11 @@ void SR_drawCircle(uint32_t x, uint32_t y, uint32_t radius)
     uint32_t currentY = 0;//?
     
     //Draw points along axes
-    SR_drawPoint(x + currentX, y);//Rightmost pixel
-    SR_drawPoint(x - currentX, y);//Leftmost pixel
-    SR_drawPoint(y, x + currentX);//Highest pixel
-    SR_drawPoint(y, x - currentX);//Lowest pixel
+    //FIXME this is wrong
+    //SR_drawPoint(x + currentX, y);//Rightmost pixel
+    //SR_drawPoint(x - currentX, y);//Leftmost pixel
+    //SR_drawPoint(y, x + currentX);//Highest pixel
+    //SR_drawPoint(y, x - currentX);//Lowest pixel
     
     int32_t midpoint = 1 - radius;//?
     while (currentX > currentY)//?

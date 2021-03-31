@@ -1,7 +1,7 @@
 #ifndef PS2UART_CPU_H
 #define PS2UART_CPU_H
 
-#define PS2_BUFFER_SIZE 128
+#define PS2_BUFFER_SIZE 32
 
 #include "bluepill.h"
 

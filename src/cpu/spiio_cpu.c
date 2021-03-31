@@ -23,8 +23,8 @@ void SPIIO_cpu_init()
     GPIOB_CRH = (GPIOB_CRH & 0x0000FFFF) | 0xB8B30000;
     
     //16 bit data frame, software slave management, internal slave select high, MSBFIRST, enable SPI, divide 36mhz peripheral clock by 2 for 18mbit, master mode, CPOL = 0, CPHA = 0
-    SPI2_CR1 = 0b0000101101000100;
-    //SPI2_CR1 = 0b0000101101111100;//TESTING slower clock that can be seen by logic analyzer
+    //SPI2_CR1 = 0b0000101101000100;
+    SPI2_CR1 = 0b0000101101111100;//TESTING slower clock that can be seen by logic analyzer
     SPI2_CR2 = 0b00000010;//DMA request on txe
     
     //DMA setup output setup

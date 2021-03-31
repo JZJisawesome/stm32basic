@@ -15,11 +15,10 @@ void main()
     PS2UART_cpu_init();
     
     SPIIO_cpu_init();
-    BASIC_init();
     
     VHAL_drawText("CPU MCU Initialized\n");
-    VHAL_flush();//So that the basic interpreter has a nice clean buffer to work with
     
+    BASIC_init();
     BASIC_begin();//Begin basic interpreter (never exits)
     
     
@@ -58,7 +57,19 @@ void main()
     SPIIO_cpu_flush();
     __delayInstructions(47202999);
     */
-    
+    //VHAL_setPos(225, 120);
+    /*
+    while (true)//TESTING
+    {
+        for (uint8_t radius = 0; radius < 100; ++ radius)
+        {
+            VHAL_clear();
+            VHAL_drawCircle_atPos(radius + 10, 120, radius);
+            VHAL_flush();
+            __delayInstructions(400000);
+        }
+    }
+    */
     //while (true);//TESTING
     VHAL_clear();
     VHAL_setPos(8, 8);

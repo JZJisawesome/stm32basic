@@ -4,6 +4,7 @@
 ** Function Listing
  * Most functions can be suffixed with _I for white on black instead of the usual black on white 
  * framebuffer and _X for xoring onto the framebuffer, so only the "base" functions are listed.
+ * _OW overwrites existing pixels
  * 
  * Initialization (No suffixes)
  *  void SR_setFrameBuffer(uint8_t* frameBuffer);//Composite framebuffer for all functions
@@ -83,6 +84,7 @@ void SR_scrollDown(uint32_t amount);//TODO implement
 void SR_drawCharByByte(uint32_t xByte, uint32_t y, char c);
 void SR_drawCharByByte_I(uint32_t xByte, uint32_t y, char c);
 void SR_drawCharByByte_X(uint32_t xByte, uint32_t y, char c);
+void SR_drawCharByByte_OW(uint32_t xByte, uint32_t y, char c);
 void SR_drawStringByByte(uint32_t xByte, uint32_t y, const char* string);//Faster
 //SR_drawText(_I,_X) take (uint32_t xByte, uint32_t y, const char* string)
 #define SR_drawText(xByte, y, string) _SR_drawText(xByte, y, string, SR_drawCharByByte)

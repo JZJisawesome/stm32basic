@@ -219,7 +219,7 @@ static void handleCharacter(char character)
         case 0x08://Backspace
         {//TODO fix this
             xPosition -= 8;
-            SR_drawCharByByte(xPosition / 8, yPosition, ' ');
+            SR_drawCharByByte_OW(xPosition / 8, yPosition, ' ');//Overwrite with a space
             break;
         }
         case '\t'://Tab
