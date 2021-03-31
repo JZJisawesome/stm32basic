@@ -53,7 +53,7 @@
 #define SPI_ENABLE (SPI_BARE | (1 << 6))//Enables SPI peripheral
 #define SPI_DISABLE SPI_BARE//Does not set SPI enable bit unlike SPI_ENABLE
 //DMA_CCR3
-#define DMA_BARE 0x2090//3/4 priority, 8 bit access, memory postincrement, memory to peripheral
+#define DMA_BARE 0x3090//Max (4/4) priority, 8 bit access, memory postincrement, memory to peripheral
 #define DMA_ENABLE (DMA_BARE | 1)//Enables DMA channel 3
 #define DMA_DISABLE DMA_BARE//Does not set channel enable bit unlike DMA_ENABLE
 

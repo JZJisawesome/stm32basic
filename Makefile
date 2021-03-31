@@ -12,7 +12,7 @@ INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
 LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
 #TODO seperate out into common deps, cpu deps, and video deps
-DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2uart_cpu.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart_video.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
@@ -28,11 +28,11 @@ $(BUILDDIR)/cpu/cpu.hex: $(BUILDDIR)/cpu/cpu | $(BUILDDIR)/cpu
 $(BUILDDIR)/video/video.hex: $(BUILDDIR)/video/video | $(BUILDDIR)/video
 	arm-none-eabi-objcopy -O ihex $(BUILDDIR)/video/video $(BUILDDIR)/video/video.hex
 
-$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o $(BUILDDIR)/cpu/basi.o $(BUILDDIR)/cpu/ps2.o $(BUILDDIR)/cpu/spiio_cpu.o $(BUILDDIR)/cpu/vhal.o | $(BUILDDIR)/cpu
-	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o $(BUILDDIR)/cpu/basi.o $(BUILDDIR)/cpu/ps2.o $(BUILDDIR)/cpu/spiio_cpu.o $(BUILDDIR)/cpu/vhal.o -o $(BUILDDIR)/cpu/cpu
+$(BUILDDIR)/cpu/cpu: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o $(BUILDDIR)/cpu/basi.o $(BUILDDIR)/cpu/ps2uart_cpu.o $(BUILDDIR)/cpu/spiio_cpu.o $(BUILDDIR)/cpu/vhal.o | $(BUILDDIR)/cpu
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/cpu/cpu.o $(BUILDDIR)/cpu/basi.o $(BUILDDIR)/cpu/ps2uart_cpu.o $(BUILDDIR)/cpu/spiio_cpu.o $(BUILDDIR)/cpu/vhal.o -o $(BUILDDIR)/cpu/cpu
 
-$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/processing.o $(BUILDDIR)/video/ps2uart.o $(BUILDDIR)/video/softrenderer.o $(BUILDDIR)/video/spiio_video.o | $(BUILDDIR)/video
-	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/processing.o $(BUILDDIR)/video/ps2uart.o $(BUILDDIR)/video/softrenderer.o $(BUILDDIR)/video/spiio_video.o -o $(BUILDDIR)/video/video
+$(BUILDDIR)/video/video: $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/processing.o $(BUILDDIR)/video/ps2uart_video.o $(BUILDDIR)/video/softrenderer.o $(BUILDDIR)/video/spiio_video.o | $(BUILDDIR)/video
+	$(CC) $(CFLAGS) $(LINKEROPTS) $(BUILDDIR)/common/bluepill.o $(BUILDDIR)/video/video.o $(BUILDDIR)/video/composite.o $(BUILDDIR)/video/processing.o $(BUILDDIR)/video/ps2uart_video.o $(BUILDDIR)/video/softrenderer.o $(BUILDDIR)/video/spiio_video.o -o $(BUILDDIR)/video/video
 
 #Object files
 
@@ -49,8 +49,8 @@ $(BUILDDIR)/cpu/cpu.o: $(SRCDIR)/cpu/cpu.c $(DEPS) | $(BUILDDIR)/cpu
 $(BUILDDIR)/cpu/basi.o: $(SRCDIR)/cpu/basi.c $(DEPS) | $(BUILDDIR)/cpu
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/cpu/basi.c -o $(BUILDDIR)/cpu/basi.o
 
-$(BUILDDIR)/cpu/ps2.o: $(SRCDIR)/cpu/ps2.c $(DEPS) | $(BUILDDIR)/cpu
-	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/cpu/ps2.c -o $(BUILDDIR)/cpu/ps2.o
+$(BUILDDIR)/cpu/ps2uart_cpu.o: $(SRCDIR)/cpu/ps2uart_cpu.c $(DEPS) | $(BUILDDIR)/cpu
+	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/cpu/ps2uart_cpu.c -o $(BUILDDIR)/cpu/ps2uart_cpu.o
 
 $(BUILDDIR)/cpu/spiio_cpu.o: $(SRCDIR)/cpu/spiio_cpu.c $(DEPS) | $(BUILDDIR)/cpu
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/cpu/spiio_cpu.c -o $(BUILDDIR)/cpu/spiio_cpu.o
@@ -69,8 +69,8 @@ $(BUILDDIR)/video/composite.o: $(SRCDIR)/video/composite.c $(DEPS) | $(BUILDDIR)
 $(BUILDDIR)/video/processing.o: $(SRCDIR)/video/processing.c $(DEPS) | $(BUILDDIR)/video
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/processing.c -o $(BUILDDIR)/video/processing.o
 
-$(BUILDDIR)/video/ps2uart.o: $(SRCDIR)/video/ps2uart.c $(DEPS) | $(BUILDDIR)/video
-	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/ps2uart.c -o $(BUILDDIR)/video/ps2uart.o
+$(BUILDDIR)/video/ps2uart_video.o: $(SRCDIR)/video/ps2uart_video.c $(DEPS) | $(BUILDDIR)/video
+	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/ps2uart_video.c -o $(BUILDDIR)/video/ps2uart_video.o
 
 $(BUILDDIR)/video/softrenderer.o: $(SRCDIR)/video/softrenderer.c $(DEPS) | $(BUILDDIR)/video
 	$(CC) $(CFLAGS) $(INC) -c $(SRCDIR)/video/softrenderer.c -o $(BUILDDIR)/video/softrenderer.o

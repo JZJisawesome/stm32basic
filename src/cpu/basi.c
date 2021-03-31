@@ -1,7 +1,7 @@
 #include "basi.h" 
 
 #include "bluepill.h"
-#include "ps2.h"
+#include "ps2uart_cpu.h"
 #include "vhal.h"
 
 //TODO create PS/2 keyboard code ps2.c and ps2.h with buffer; filled by interrupts on edges of clock sent by keyboard

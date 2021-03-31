@@ -9,3 +9,7 @@ TODO
 ## Communication
 
 TODO
+
+## Interrupt/DMA priority
+
+TODO

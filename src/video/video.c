@@ -3,7 +3,7 @@
 #include "vincent.h"//8x8 Font
 #include "processing.h"
 #include "spiio_video.h"
-#include "ps2uart.h"
+#include "ps2uart_video.h"
 
 //TODO set interrupt priority for video sync as highest
 
@@ -45,7 +45,7 @@ void main()
     Composite_init((uint8_t*)ramFB);//First that way project information is displayed during initialization
     
     //TODO Do other init code here
-    PS2UART_init();
+    PS2UART_video_init();
     SPIIO_video_init();//Should be last thing to initialize
     
     SR_drawText(1, 32, "Video MCU Initialized : ");

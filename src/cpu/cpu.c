@@ -2,7 +2,7 @@
 #include "vhal.h"
 #include "spiio_cpu.h"
 #include "basi.h"
-#include "ps2.h"
+#include "ps2uart_cpu.h"
 
 //TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
 
@@ -12,7 +12,7 @@ void main()
     
     GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;//TESTING for led
     
-    PS2_init();
+    PS2UART_cpu_init();
     
     SPIIO_cpu_init();
     BASIC_init();
@@ -23,7 +23,7 @@ void main()
     BASIC_begin();//Begin basic interpreter (never exits)
     
     
-    
+/*************************************************************/
     
     //TESTING
     
@@ -62,12 +62,12 @@ void main()
     //while (true);//TESTING
     VHAL_clear();
     VHAL_setPos(8, 8);
-    bool capital = false;
+    //bool capital = false;
     while (true)
     {
-        if (!PS2_empty())
+        if (!PS2UART_empty())
         {
-            char character = PS2_pop();
+            char character = PS2UART_pop();
             /*
             char numString[4];
             numString[3] = 0x00;//Null byte
@@ -77,14 +77,16 @@ void main()
             VHAL_drawText(numString);
             VHAL_flush();
             */
-            
+            VHAL_drawChar(character);
+            VHAL_flush();
+            /*
             if ((character != 0xE0) && (character != 0xF0))
             {
                 VHAL_drawChar(PS2_toAscii(character, capital));
                 VHAL_flush();
                 capital = !capital;
             }
-            
+            */
         }
         //VHAL_flush();
         /*

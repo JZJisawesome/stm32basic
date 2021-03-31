@@ -1,4 +1,4 @@
-#include "ps2uart.h"
+#include "ps2uart_video.h"
 
 #include "bluepill.h"
 #include "softrenderer.h"//TESTING
@@ -22,7 +22,7 @@ static void handleByte();
 static void sendData(uint8_t data);
 static char toAscii();
 
-void PS2UART_init()
+void PS2UART_video_init()
 {
     //Set PB4 and PB7 high, then as open-collector outputs
     GPIOB_BSRR = 0b0000000010010000;
