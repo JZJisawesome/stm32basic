@@ -193,6 +193,8 @@ static void handleCharacter(char character)
             //Just ignore a null character
             break;
         }
+        /*
+        //TODO make these into their own proper commands
         case 0x01://Move up
         {
             yPosition -= 8;
@@ -213,6 +215,7 @@ static void handleCharacter(char character)
             xPosition += 8;
             break;
         }
+        */
         case 0x08://Backspace
         {//TODO fix this
             xPosition -= 8;

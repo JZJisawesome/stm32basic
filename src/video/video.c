@@ -24,6 +24,8 @@ const uint8_t JZJ[] =//My initials
 
 void main()
 {
+    GPIOC_CRH = (GPIOC_CRH & 0xFF0FFFFF) | 0x00300000;//TESTING for led
+    
     //Project information header
     SR_setCharacterRom(vincentFont);
     SR_setFrameBuffer((uint8_t*)ramFB);
