@@ -1,6 +1,8 @@
 #ifndef VHAL_H
 #define VHAL_H
 
+//TODO add support for audio played on video mcu
+
 #include "bluepill.h"
 #include "spiio_cpu.h"
 

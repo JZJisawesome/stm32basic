@@ -5,6 +5,8 @@
 
 //TODO seperate out processing loop/switches from code that actually does stuff somehow
 
+//TODO add support for audio played on video mcu
+
 static const uint8_t* frameBuffer;//Pointer to framebuffer
 static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
 
