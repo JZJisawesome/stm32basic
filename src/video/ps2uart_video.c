@@ -27,12 +27,12 @@ void PS2UART_video_init()
     //Set PB4 and PB7 high, then as open-collector outputs
     GPIOB_BSRR = 0b0000000010010000;
     GPIOB_CRL |= 0x70070000;
-    //Set PA9 as AF push-pull output
-    GPIOA_CRH = (GPIOA_CRH & 0xFFFFFF0F) | 0x000000B0;
+    //Set PA2 as AF push-pull output
+    GPIOA_CRL = (GPIOA_CRL & 0xFFFFF0FF) | 0x00000B00;
     
     //Setup uart
-    USART1_BRR = 0x0020;//Set baud rate to 2.25mbit
-    USART1_CR1 = 0b0010000000001000;//Enable uart (transmitter only, 8 data bits)
+    USART2_BRR = 0x0010;//Set baud rate to 2.25mbit
+    USART2_CR1 = 0b0010000000001000;//Enable uart (transmitter only, 8 data bits)
     
     //Initialize EXTI4 for PB4 for negative edges
     AFIO_EXTICR2 |= 0x00000001;//Map PB4 as exti 4
@@ -234,9 +234,9 @@ static void sendData(uint8_t data)
 {
     //Wait for transmit buffer to empty (should never happen because
     //ps/2 is much slower than uart, even with a slow baud rate)
-    while (!(USART1_SR & (1 << 7)));
+    while (!(USART2_SR & (1 << 7)));
     
-    USART1_DR = data;//Write data
+    USART2_DR = data;//Write data
 }
 
 static char toAscii()

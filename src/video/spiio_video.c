@@ -20,8 +20,8 @@ void SPIIO_video_init()
     DMA_CPAR4 = (uint32_t)(&SPI2_DR);
     DMA_CMAR4 = (uint32_t)(buffer);
     DMA_CNDTR4 = SPIIO_VIDEO_BUFFER_SIZE;
-    //Med (2/4) priority, 16 bit memory and peripheral transfers, memory increment, circular mode, read from peripheral, enable channel
-    DMA_CCR4 = 0b0001010110100001;
+    //Med-high (3/4) priority, 16 bit memory and peripheral transfers, memory increment, circular mode, read from peripheral, enable channel
+    DMA_CCR4 = 0b0010010110100001;
     
     GPIOB_BSRR = 1 << 14;//Set PB14 high to signal to cpu that we're ready
 }
