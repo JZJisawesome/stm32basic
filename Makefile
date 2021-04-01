@@ -9,14 +9,18 @@ CC = arm-none-eabi-gcc
 CFLAGS = -Wall -DF_CPU=16000000 -mthumb -mcpu=cortex-m3 -std=gnu17 -ffreestanding
 COMMONOPTIMIZINGCFLAGS = -flto -fuse-linker-plugin -fmerge-all-constants
 INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
-LINKEROPTS = -ffreestanding -nostartfiles -Wl,--print-memory-usage -Wl,-T,bluepill.ld
+LINKEROPTS = -ffreestanding -nostartfiles -Wl,--print-memory-usage -Wl,-T,bluepill.ld --specs=nano.specs
+#FIXME why do -ffunction-sections and -fdata-sections cause problems?
+#WARNING: USE --specs=nano.specs to save space!
+#See https://devzone.nordicsemi.com/f/nordic-q-a/1520/how-to-get-rid-of-impure_data
+#https://stackoverflow.com/questions/17515362/lpcxpresso-with-cortex-m3-what-is-libc-alib-a-impure-o-any-why-is-it-using-1k
 
 #TODO seperate out into common deps, cpu deps, and video deps
 DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2uart_cpu.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart_video.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -Ofast -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
-debug: CFLAGS += -DDEBUG -g -Og
+debug: CFLAGS += -g -Og -DNDEBUG#-DDEBUG TODO fix this
 release: $(BUILDDIR)/video/video.hex $(BUILDDIR)/cpu/cpu.hex
 debug: $(BUILDDIR)/video/video.hex $(BUILDDIR)/cpu/cpu.hex
 

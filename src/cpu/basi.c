@@ -61,7 +61,7 @@ static variable_t* variableMemoryEndPointer;//Should be set to byte after progra
 //static type?* stringMemoryStartPointer;//TODO figure out
 //static type?* stringMemoryEndPointer;//TODO figure out
 
-static void interpretLine(const char* enteredText);
+static void interpretText(const char* enteredText);
 static void tokenize(const char* enteredText, line_t* output);
 
 void BASIC_init()//Init data structures
@@ -73,6 +73,7 @@ void BASIC_begin()//Begin basic interpreter
 {
     while (true)
     {
+        //Statically allocate room for lineBuffer
         static char lineBuffer[BASIC_LINE_LENGTH];//Buffer for entered text
         
         VHAL_drawChar('>');
@@ -124,23 +125,25 @@ void BASIC_begin()//Begin basic interpreter
                 VHAL_flush();
         }
         
-        interpretLine(lineBuffer);//Interpret contents of line buffer
+        interpretText(lineBuffer);//Interpret contents of line buffer
     }
 }
 
-static void interpretLine(const char* enteredText)
+static void interpretText(const char* enteredText)
 {
     //NOTE: only interpret enteredText up to point where null byte is encountered
     
     VHAL_drawText(enteredText);//TESTING
     VHAL_drawChar('\n');//TESTING
     
-    //Tokenize enteredText
-    union
+    //Statically allocate room a tokenized line buffer
+    static union
     {
         line_t tokenizedLine;
         char storage[BASIC_LINE_LENGTH + 16];//A little bit of headroom in case entire line is filled and tokenize needs extra room
     } buffer;
+    
+    //Tokenize the text that was entered
     tokenize(enteredText, &buffer.tokenizedLine);
     
     VHAL_drawChar(buffer.tokenizedLine.lineNumber);//TESTING
@@ -148,11 +151,33 @@ static void interpretLine(const char* enteredText)
     
     //TODO now interpret (either execute or put into program memory)
     //If 0, should be executed immediatly, else put into program memory in correct place
+    if (buffer.tokenizedLine.lineNumber == 0)
+    {
+        //executeLine(&buffer.tokenizedLine);
+    }
+    else
+    {
+        //storeLine(&buffer.tokenizedLine);
+    }
 }
 
+/* List of tokens
+ * 
+ */
 static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredText and return in output (NOTE: leaves nextLine unchanged)
 {
-    output->lineNumber = (uint16_t)(strtoul(enteredText, NULL, 10));//Extract line number (if it exists)
+    output->lineNumber = (uint16_t)(strtoul(enteredText, NULL, 10));//Extract line number (if it exists, else 0 will be written)
     while (isdigit((int)(*enteredText))) {++enteredText;}//Skip to the first non-number character
     //TODO tokenize rest of line
+    char character = *enteredText;
+    while (character != 0x00)//Until a null byte is encountered
+    {
+        switch (character)
+        {
+            //TODO
+        }
+        //Advance to next character
+        ++enteredText;
+        character = *enteredText;
+    }
 }

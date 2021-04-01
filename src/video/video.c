@@ -7,6 +7,7 @@
 #include "spiio_video.h"
 #include "ps2uart_video.h"
 
+//NOTE: Unfortunatly, newlib takes up 100 bytes of space
 //TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
 
 //TODO add support for audio played on video mcu

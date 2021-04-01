@@ -7,6 +7,7 @@
 #include "basi.h"
 #include "ps2uart_cpu.h"
 
+//NOTE: Unfortunatly, newlib takes up 100 bytes of space
 //TODO maybe move keyboard code/ascii translation to video mcu and send over serial?
 
 void main()
