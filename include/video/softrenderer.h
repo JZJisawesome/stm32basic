@@ -42,7 +42,7 @@
 #ifndef SOFTRENDERER_H
 #define SOFTRENDERER_H
 
-#include "stdint.h"
+#include <stdint.h>
 
 /* Settings (must be filled in) */
 //Defaults

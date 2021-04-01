@@ -3,8 +3,8 @@
 
 #define SPIIO_CPU_BUFFER_SIZE 128//TODO make this as big as possible
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 void SPIIO_cpu_init();
 bool SPIIO_full();//If out buffer is full

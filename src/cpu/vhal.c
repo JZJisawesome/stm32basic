@@ -1,6 +1,6 @@
 #include "vhal.h" 
 
-#include "stdint.h"
+#include <stdint.h>
 
 //TODO add support for audio played on video mcu
 

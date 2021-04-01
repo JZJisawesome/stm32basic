@@ -1,7 +1,8 @@
 #include "basi.h" 
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "ps2uart_cpu.h"
 #include "vhal.h"
 

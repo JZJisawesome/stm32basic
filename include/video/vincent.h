@@ -2,7 +2,7 @@
 #ifndef VINCENT_H
 #define VINCENT_H 1
 
-#include "stdint.h"
+#include <stdint.h>
 
 //vincentFont[ascii][verticalByte]
 const uint8_t vincentFont[128][8] = { 

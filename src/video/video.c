@@ -1,4 +1,4 @@
-#include "stdint.h"
+#include <stdint.h>
 
 #include "composite.h"
 #include "softrenderer.h"

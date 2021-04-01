@@ -1,7 +1,7 @@
 #include "spiio_video.h"
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "bluepill.h"
 
