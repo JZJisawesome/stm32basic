@@ -8,34 +8,34 @@
 //Position management
 void VHAL_setPos(uint16_t x, uint16_t y)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((3 << 9) | x);//Set x position
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((4 << 9) | y);//Set y position
 }
 
 //Screen Manipulation
 void VHAL_clear()
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((1 << 9) | 0);//Screen manipulation command 0: clear
 }
 
 void VHAL_fill()
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((1 << 9) | 1);//Screen manipulation command 1: fill
 }
 
 void VHAL_scrollUp()
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((1 << 9) | 2);//Screen manipulation command 2: scroll up
 }
 
 void VHAL_scrollDown()
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((1 << 9) | 3);//Screen manipulation command 3: scroll down
 }
 
@@ -48,7 +48,7 @@ void VHAL_drawChar_atPos(uint16_t x, uint16_t y, char character)
 
 void VHAL_drawChar(char character)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(character);//Pushing characters is designed to be fast
 }
 
@@ -63,7 +63,7 @@ void VHAL_drawText(const char* string)
     char character = *string;
     if (character)//String does not start with a null byte
     {
-        SPIIO_smartBlockingFlush();
+        SPIIO_smartFlush();
         SPIIO_push((2 << 9) | character);//First character is sent along with string write command
         
         while (true)
@@ -76,7 +76,7 @@ void VHAL_drawText(const char* string)
             
             if (!character)
             {
-                SPIIO_smartBlockingFlush();
+                SPIIO_smartFlush();
                 SPIIO_push(command);
                 break;
             }
@@ -86,7 +86,7 @@ void VHAL_drawText(const char* string)
             
             command |= character << 8;
             
-            SPIIO_smartBlockingFlush();
+            SPIIO_smartFlush();
             SPIIO_push(command);
             
             if (!character)//We do this here because we still have to send the null byte to 
@@ -104,9 +104,9 @@ void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 
 void VHAL_drawLineTo(uint16_t x, uint16_t y)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((5 << 9) | x);//Start multi command transfer of line coords and send x
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(y);//End with sending y coordinate
 }
 
@@ -119,9 +119,9 @@ void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t 
 
 void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((8 << 9) | xCount);//Start multi command transfer of rect size and send x size
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(yCount);//End with sending y size
 }
 
@@ -133,13 +133,13 @@ void VHAL_drawTriangle_atPos(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
 
 void VHAL_drawTriangle(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((9 << 9) | x1);//Start multi command transfer of tri and send x1
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(y1);
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(x2);
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push(y2);
 }
 
@@ -151,6 +151,6 @@ void VHAL_drawCircle_atPos(uint32_t x, uint32_t y, uint32_t radius)
 
 void VHAL_drawCircle(uint32_t radius)
 {
-    SPIIO_smartBlockingFlush();
+    SPIIO_smartFlush();
     SPIIO_push((10 << 9) | radius);
 }

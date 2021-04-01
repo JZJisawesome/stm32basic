@@ -49,7 +49,6 @@ void BASIC_begin()//Begin basic interpreter
                         if (lineBufferPointer != 0)
                         {
                             VHAL_drawChar(0x08);
-                            VHAL_flush();
                             --lineBufferPointer;
                         }
                         
@@ -59,7 +58,6 @@ void BASIC_begin()//Begin basic interpreter
                     {
                         enterPressed = true;
                         VHAL_drawChar('\n');
-                        VHAL_flush();//NOTE not needed here because will be flushed by prompt/code in interpretLine
                         lineBuffer[lineBufferPointer] = 0x00;//End line with null byte
                         //No need to increment line pointer because it's the end of the line
                         //and it will be reset next time
@@ -71,7 +69,6 @@ void BASIC_begin()//Begin basic interpreter
                         if (lineBufferPointer < (LINE_LENGTH - 1))//Leave 1 byte for enter key
                         {
                             VHAL_drawChar(key);
-                            VHAL_flush();
                             lineBuffer[lineBufferPointer] = key;
                             ++lineBufferPointer;
                         }
@@ -79,6 +76,8 @@ void BASIC_begin()//Begin basic interpreter
                     }
                 }
             }
+            else//While we're waiting for key strokes, flush things that were typed to the screen
+                VHAL_flush();
         }
         
         interpretLine();//Interpret contents of line buffer
@@ -90,6 +89,5 @@ static void interpretLine()
     //NOTE: only interpret up to point where null byte is encountered
     
     VHAL_drawText(lineBuffer);//TESTING
-    //FIXME bug when characters is > 2 lines long, this newline and the prompt arent flushed until another key is pressed
     VHAL_drawChar('\n');//TESTING
 }

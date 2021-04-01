@@ -7,9 +7,9 @@
 
 void SPIIO_cpu_init();
 bool SPIIO_full();//If out buffer is full
-void SPIIO_push(uint16_t data);//Only call this if SPIIO_full() is false (or after SPIIO_smartBlockingFlush())
-void SPIIO_flush();
-//Flushes only if needed, then waits until buffer has room again
-#define SPIIO_smartBlockingFlush() do {while (SPIIO_full()) {SPIIO_flush();}} while (0)
+void SPIIO_push(uint16_t data);//Only call this if SPIIO_full() is false (or after SPIIO_smartFlush() or SPIIO_forcedFlush())
+void SPIIO_smartFlush();//Flushes only if needed (blocks until SPIIO_full()) but MAY NOT FLUSH also (CAREFUL)
+void SPIIO_forcedFlush();//Blocks until a flush stops, then flushes (recommended for flush guarantee)
+
 
 #endif

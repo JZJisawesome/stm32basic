@@ -1,13 +1,16 @@
 #ifndef VHAL_H
 #define VHAL_H
 
+//NOTE: VHAL functions only block if the spiio buffer runs out of room
+//(they all always call SPIIO_smartFlush() before any pushes internally)
+
 //TODO add support for audio played on video mcu
 
 #include "bluepill.h"
 #include "spiio_cpu.h"
 
 //Flushing (can save time if a draw call would otherwise stall)
-#define VHAL_flush() do {SPIIO_flush();} while (0)
+#define VHAL_flush() do {SPIIO_forcedFlush();} while (0)
 
 //Position management
 void VHAL_setPos(uint16_t x, uint16_t y);

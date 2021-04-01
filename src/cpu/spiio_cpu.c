@@ -14,6 +14,9 @@ static volatile uint16_t buffer[SPIIO_CPU_BUFFER_SIZE];//Read by DMA
 static uint16_t pointer = 0;//Software pointer (not DMA pointer)
 static bool dmaBufferFirstHalf = true;//Next half of buffer to transfer will be the first half
 
+//Static functions defs
+static void flush();
+
 //Functions
 
 void SPIIO_cpu_init()
@@ -50,19 +53,38 @@ void SPIIO_push(uint16_t data)//Only call this if SPIIO_full() is false (or afte
     ++pointer;
 }
 
-void SPIIO_flush()
+//Flushes only if needed (blocks until SPIIO_full()) but MAY NOT FLUSH also (CAREFUL)
+void SPIIO_smartFlush()
 {
-    if (DMA_CNDTR5 == 0)//Transfer not currently occuring
+    while (SPIIO_full())//Are we out of room? (if not, we just return)
     {
-        uint16_t offset = dmaBufferFirstHalf ? 0 : HALF_BUFFER_SIZE;
-        uint16_t amountToTransfer = pointer - offset;
+        //We wait for any flushes currently in progress to finish, then flush
+        //our half of the buffer at which point SPIIO_full() will become false
         
-        DMA_CCR5 &= ~1;//Disable DMA channel while modifying stuffs
-        DMA_CMAR5 = (uint32_t)(buffer + offset);
-        DMA_CNDTR5 = amountToTransfer;
-        DMA_CCR5 |= 1;//Enable and start dma transfer
-        
-        pointer = dmaBufferFirstHalf ? HALF_BUFFER_SIZE : 0;//Set pointer to other half of buffer
-        dmaBufferFirstHalf = !dmaBufferFirstHalf;
+        if (DMA_CNDTR5 == 0)//Transfer not currently occuring
+            flush();//Safe to flush now
     }
+}
+
+//Blocks until a flush stops, then flushes (recommended for flush guarantee)
+void SPIIO_forcedFlush()
+{
+    while ((DMA_CNDTR5 != 0));//Wait for a flush to complete
+    
+    //Now we flush
+    flush();//Safe to flush now that a previous flush finished
+}
+
+static void flush()
+{
+    uint16_t offset = dmaBufferFirstHalf ? 0 : HALF_BUFFER_SIZE;
+    uint16_t amountToTransfer = pointer - offset;
+    
+    DMA_CCR5 &= ~1;//Disable DMA channel while modifying stuffs
+    DMA_CMAR5 = (uint32_t)(buffer + offset);
+    DMA_CNDTR5 = amountToTransfer;
+    DMA_CCR5 |= 1;//Enable and start dma transfer
+    
+    pointer = dmaBufferFirstHalf ? HALF_BUFFER_SIZE : 0;//Set pointer to other half of buffer
+    dmaBufferFirstHalf = !dmaBufferFirstHalf;
 }
