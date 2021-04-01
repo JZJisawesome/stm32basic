@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "ps2uart_cpu.h"
 #include "vhal.h"
@@ -20,7 +22,7 @@ typedef struct line_t line_t;
 struct line_t
 {
     line_t* nextLine;//If null, there is no next line
-    uint16_t lineNumber;
+    uint16_t lineNumber;//Can be between 1 and 0xFFFF
     uint8_t tokens[];
 };
 
@@ -141,16 +143,16 @@ static void interpretLine(const char* enteredText)
     } buffer;
     tokenize(enteredText, &buffer.tokenizedLine);
     
-    //TODO tokenize, then
+    VHAL_drawChar(buffer.tokenizedLine.lineNumber);//TESTING
+    VHAL_drawChar('\n');//TESTING
+    
+    //TODO now interpret (either execute or put into program memory)
+    //If 0, should be executed immediatly, else put into program memory in correct place
 }
 
-/*
-int32_t atoi(const char* string)
+static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredText and return in output (NOTE: leaves nextLine unchanged)
 {
-    
-}*/
-
-static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredText and return in output
-{
-    //output->lineNumber = atoi(enteredText);//TESTING
+    output->lineNumber = (uint16_t)(strtoul(enteredText, NULL, 10));//Extract line number (if it exists)
+    while (isdigit((int)(*enteredText))) {++enteredText;}//Skip to the first non-number character
+    //TODO tokenize rest of line
 }
