@@ -33,8 +33,8 @@ void main()
     SR_setCharacterRom(vincentFont);
     SR_setFrameBuffer((uint8_t*)ramFB);
     
-    SR_drawText(1, 8,  "JZJBasic on Dual STM32F103C8T6's (20K+20K SRAM)");
-    SR_drawText(1, 16, "Copyright (c) 2021 John Jekel");
+    SR_drawText(1, 8,  "JZJBasic on Dual STM32F103C8T6's (40KiB + 256KiB)");
+    SR_drawText(1, 16, "Copyright (c) 2021 John Jekel     SRAM    Flash");
     SR_drawText(1, 24, "MIT Licensed: https://gitlab.com/JZJisawesome/stm32basic");
     
     //My initials
