@@ -9,13 +9,13 @@ CC = arm-none-eabi-gcc
 CFLAGS = -Wall -DF_CPU=16000000 -mthumb -mcpu=cortex-m3 -std=gnu17 -ffreestanding
 COMMONOPTIMIZINGCFLAGS = -flto -fuse-linker-plugin -fmerge-all-constants
 INC = -I$(INCDIR) -I$(INCDIR)/common -I$(INCDIR)/cpu -I$(INCDIR)/video
-LINKEROPTS = -ffreestanding -nostdlib -Wl,--print-memory-usage -Wl,-T,bluepill.ld
+LINKEROPTS = -ffreestanding -nostartfiles -Wl,--print-memory-usage -Wl,-T,bluepill.ld
 
 #TODO seperate out into common deps, cpu deps, and video deps
 DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2uart_cpu.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart_video.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
-release: CFLAGS += -O3 -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
+release: CFLAGS += -Ofast -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)
 debug: CFLAGS += -DDEBUG -g -Og
 release: $(BUILDDIR)/video/video.hex $(BUILDDIR)/cpu/cpu.hex
 debug: $(BUILDDIR)/video/video.hex $(BUILDDIR)/cpu/cpu.hex

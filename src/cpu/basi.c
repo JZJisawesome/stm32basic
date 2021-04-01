@@ -35,20 +35,20 @@ typedef struct
     {
         //Scalar types
         float real;
-        uint32_t integer;
+        int32_t integer;
         char* string;//Points to string (in program or string memory)//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
         
         //Array types
         //If a variable is accessed like an array from BASIC, transparently use these instead of the above (even though)
         //Pointers to array memory
         float* realArray;
-        uint32_t* integerArray;
+        int32_t* integerArray;
         char** stringArray;//Points to array of string pointers//NOTE string can point to program memory if assigned constant in order to save dynamic memory
     };
 } variable_t;
 
-static char lineBuffer[BASIC_LINE_LENGTH];
-static uint8_t basicMem[BASIC_BYTES];
+static uint8_t basicMem[BASIC_BYTES];//Regular basic memory
+
 static const line_t* programMemoryPointer = (line_t*)(basicMem);//Where program memory starts after run command
 static variable_t* variableMemoryStartPointer;//Should be set to byte after program memory after run command
 static variable_t* variableMemoryEndPointer;//Should be set to byte after program memory after run command (will grow to hold variables)
@@ -57,7 +57,8 @@ static variable_t* variableMemoryEndPointer;//Should be set to byte after progra
 //static type?* stringMemoryStartPointer;//TODO figure out
 //static type?* stringMemoryEndPointer;//TODO figure out
 
-static void interpretLine();//The heavy lifting function
+static void interpretLine(const char* enteredText);
+static void tokenize(const char* enteredText, line_t* output);
 
 void BASIC_init()//Init data structures
 {
@@ -68,6 +69,8 @@ void BASIC_begin()//Begin basic interpreter
 {
     while (true)
     {
+        static char lineBuffer[BASIC_LINE_LENGTH];//Buffer for entered text
+        
         VHAL_drawChar('>');
         VHAL_flush();//Force cursor to show up
         
@@ -80,6 +83,7 @@ void BASIC_begin()//Begin basic interpreter
                 uint8_t key = PS2UART_pop();
                 switch (key)
                 {
+                    //TODO handle arrows, delete, insert, etc
                     case 0x08://Backspace
                     {
                         if (lineBufferPointer != 0)
@@ -112,20 +116,39 @@ void BASIC_begin()//Begin basic interpreter
                     }
                 }
             }
-            else//While we're waiting for key strokes, flush things that were typed to the screen
+            else//While we're waiting for more key strokes, flush things that were typed to the screen
                 VHAL_flush();
         }
         
-        interpretLine();//Interpret contents of line buffer
+        interpretLine(lineBuffer);//Interpret contents of line buffer
     }
 }
 
-static void interpretLine()
+static void interpretLine(const char* enteredText)
 {
-    //NOTE: only interpret lineBuffer up to point where null byte is encountered
+    //NOTE: only interpret enteredText up to point where null byte is encountered
     
-    VHAL_drawText(lineBuffer);//TESTING
+    VHAL_drawText(enteredText);//TESTING
     VHAL_drawChar('\n');//TESTING
     
+    //Tokenize enteredText
+    union
+    {
+        line_t tokenizedLine;
+        char storage[BASIC_LINE_LENGTH + 16];//A little bit of headroom in case entire line is filled and tokenize needs extra room
+    } buffer;
+    tokenize(enteredText, &buffer.tokenizedLine);
+    
     //TODO tokenize, then
+}
+
+/*
+int32_t atoi(const char* string)
+{
+    
+}*/
+
+static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredText and return in output
+{
+    //output->lineNumber = atoi(enteredText);//TESTING
 }
