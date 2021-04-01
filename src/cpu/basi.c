@@ -13,6 +13,7 @@
 //https://www.c64-wiki.com/wiki/Array
 //https://www.c64-wiki.com/wiki/Variable
 
+//Lines are tokenized from keyboard input and stored into program memory
 typedef struct line_t line_t;
 struct line_t
 {
@@ -21,6 +22,7 @@ struct line_t
     uint8_t tokens[];
 };
 
+//Variables are stored into variable memory (are 6 byte each)
 typedef struct
 {
     //Identifiers (name and type) (2 bytes total)
@@ -34,13 +36,14 @@ typedef struct
         //Scalar types
         float real;
         uint32_t integer;
-        char* string;//Points to string//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
+        char* string;//Points to string (in program or string memory)//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
         
         //Array types
         //If a variable is accessed like an array from BASIC, transparently use these instead of the above (even though)
+        //Pointers to array memory
         float* realArray;
         uint32_t* integerArray;
-        char** stringArray;//Points to array of string pointers//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
+        char** stringArray;//Points to array of string pointers//NOTE string can point to program memory if assigned constant in order to save dynamic memory
     };
 } variable_t;
 
@@ -49,6 +52,10 @@ static uint8_t basicMem[BASIC_BYTES];
 static const line_t* programMemoryPointer = (line_t*)(basicMem);//Where program memory starts after run command
 static variable_t* variableMemoryStartPointer;//Should be set to byte after program memory after run command
 static variable_t* variableMemoryEndPointer;//Should be set to byte after program memory after run command (will grow to hold variables)
+//static type?* arrayMemoryStartPointer;//TODO figure out
+//static type?* arrayMemoryEndPointer;//TODO figure out
+//static type?* stringMemoryStartPointer;//TODO figure out
+//static type?* stringMemoryEndPointer;//TODO figure out
 
 static void interpretLine();//The heavy lifting function
 
