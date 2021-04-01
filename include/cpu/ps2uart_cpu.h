@@ -3,7 +3,8 @@
 
 #define PS2_BUFFER_SIZE 32
 
-#include "bluepill.h"
+#include "stdint.h"
+#include "stdbool.h"
 
 void PS2UART_cpu_init();
 bool PS2UART_empty();//If buffer is empty

@@ -1,3 +1,6 @@
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "bluepill.h"
 #include "vhal.h"
 #include "spiio_cpu.h"

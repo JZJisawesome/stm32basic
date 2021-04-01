@@ -57,6 +57,7 @@
 #define COMPOSITE_H
 
 #include "bluepill.h"
+#include "stdint.h"
 
 /* Settings */
 //Default resolution (H,V): 944, 484 (Interlacing)

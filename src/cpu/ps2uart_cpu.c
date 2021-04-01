@@ -1,5 +1,8 @@
 #include "ps2uart_cpu.h"
 
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "bluepill.h"
 
 static volatile uint8_t buffer[PS2_BUFFER_SIZE];

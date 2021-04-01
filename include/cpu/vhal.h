@@ -6,7 +6,7 @@
 
 //TODO add support for audio played on video mcu
 
-#include "bluepill.h"
+#include "stdint.h"
 #include "spiio_cpu.h"
 
 //Flushing (can save time if a draw call would otherwise stall)

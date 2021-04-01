@@ -3,8 +3,6 @@
 #ifndef PS2UART_VIDEO_H
 #define PS2UART_VIDEO_H
 
-#include "bluepill.h"
-
 void PS2UART_video_init();
 
 #endif

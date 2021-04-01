@@ -1,3 +1,5 @@
+#include "stdint.h"
+
 #include "composite.h"
 #include "softrenderer.h"
 #include "vincent.h"//8x8 Font

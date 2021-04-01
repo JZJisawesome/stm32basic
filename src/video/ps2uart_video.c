@@ -1,5 +1,8 @@
 #include "ps2uart_video.h"
 
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "bluepill.h"
 #include "softrenderer.h"//TESTING
 

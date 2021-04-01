@@ -1,4 +1,8 @@
 #include "spiio_cpu.h"
+
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "bluepill.h"
 
 //TODO if possible do pointer chacing like in spiio_video instead of two buffers that are half the size

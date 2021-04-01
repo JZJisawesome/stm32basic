@@ -1,6 +1,10 @@
 /* Library to display composite video from a framebuffer on an STM32F103C8T6/B */
-#include "bluepill.h"
 #include "composite.h"
+
+#include "stdint.h"
+#include "stdbool.h"
+
+#include "bluepill.h"
 
 /* Constants */
 

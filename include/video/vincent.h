@@ -2,8 +2,10 @@
 #ifndef VINCENT_H
 #define VINCENT_H 1
 
+#include "stdint.h"
+
 //vincentFont[ascii][verticalByte]
-const unsigned char vincentFont[128][8] = { 
+const uint8_t vincentFont[128][8] = { 
   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, //
   {}, //Move up
   {}, //Move left

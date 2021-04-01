@@ -1,4 +1,7 @@
 #include "processing.h" 
+
+#include "stdint.h"
+
 #include "bluepill.h"
 #include "softrenderer.h"
 #include "spiio_video.h"
