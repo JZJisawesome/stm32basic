@@ -33,7 +33,7 @@ void BASIC_begin()//Begin basic interpreter
     while (true)
     {
         VHAL_drawChar('>');
-        VHAL_flush();
+        VHAL_flush();//Force cursor to show up
         
         bool enterPressed = false;
         uint_fast8_t lineBufferPointer = 0;

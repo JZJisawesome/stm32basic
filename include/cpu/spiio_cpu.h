@@ -11,5 +11,4 @@ void SPIIO_push(uint16_t data);//Only call this if SPIIO_full() is false (or aft
 void SPIIO_smartFlush();//Flushes only if needed (blocks until SPIIO_full()) but MAY NOT FLUSH also (CAREFUL)
 void SPIIO_forcedFlush();//Blocks until a flush stops, then flushes (recommended for flush guarantee)
 
-
 #endif

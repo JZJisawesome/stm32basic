@@ -110,13 +110,23 @@ void SR_scrollUp(uint32_t amount)
 {
     assert(amount != 0);
     
-    uint32_t amountBytes = (amount * SR_BYTES_PER_LINE);
+    uint32_t amountBytes = (SR_BYTES_PER_LINE * amount);//Start amount # of lines from start of fb
+    uint32_t copyEnd = (SR_BYTES_PER_LINE * SR_LINES);//End at end of framebuffer
     
-    for (uint32_t i = amountBytes; i < (SR_BYTES_PER_LINE * SR_LINES); ++i)
+    for (uint32_t i = amountBytes; i < copyEnd; ++i)
     {
         uint8_t* sourcePTR = fb + i;
         uint8_t* destinationPTR = sourcePTR - amountBytes;
         *destinationPTR = *sourcePTR;
+    }
+    
+    uint32_t delBegin = copyEnd - amountBytes;//We have to zero out new lines
+    
+    //Zero out new lines from the bottom
+    for (uint32_t i = delBegin; i < copyEnd; ++i)
+    {
+        uint8_t* pointer = fb + i;
+        *pointer = 0x00;
     }
 }
 

@@ -3,6 +3,11 @@
 #include "softrenderer.h"
 #include "spiio_video.h"
 
+#define LEFT_BORDER 8
+#define RIGHT_BORDER 8
+#define TOP_BORDER 8
+#define BOTTOM_BORDER 16
+
 //TODO seperate out processing loop/switches from code that actually does stuff somehow
 
 //TODO add support for audio played on video mcu
@@ -217,7 +222,7 @@ static void handleCharacter(char character)
         }
         */
         case 0x08://Backspace
-        {//TODO fix this
+        {//TODO fix this if at beginning of line
             xPosition -= 8;
             SR_drawCharByByte_OW(xPosition / 8, yPosition, ' ');//Overwrite with a space
             break;
@@ -231,21 +236,24 @@ static void handleCharacter(char character)
         case '\n'://New line
         case '\r'://Carriage return
         {
-            xPosition = 8;
+            xPosition = LEFT_BORDER;
         }//Fallthrough
         case '\v'://Vertical tab
         {
             yPosition += 8;
             
-            if (yPosition >= PROCESSING_LINES)
-                yPosition = 8;//So character is not cut off
+            if (yPosition >= (PROCESSING_LINES - BOTTOM_BORDER))
+            {
+                SR_scrollUp(8);//Scroll screen back
+                yPosition -= 8;
+            }
             
             break;
         }
         case 0x0C://Form feed
-        {
-            xPosition = 8;
-            yPosition = 8;
+        {//TODO is this what this should do?
+            xPosition = LEFT_BORDER;
+            yPosition = TOP_BORDER;
             break;
         }
         case 0x7F://Delete
@@ -268,14 +276,17 @@ static void incrementCharacterPosition()
 {
     xPosition += 8;
     
-    if ((xPosition / 8) >= PROCESSING_BYTES_PER_LINE)
+    if ((xPosition / 8) >= (PROCESSING_BYTES_PER_LINE - (RIGHT_BORDER / 8)))
     {
-        xPosition = 8;//So character is not cut off
+        xPosition = LEFT_BORDER;//Wrap
         yPosition += 8;
     }
     
-    if (yPosition >= PROCESSING_LINES)
-        yPosition = 8;//So character is not cut off
+    if (yPosition >= (PROCESSING_LINES - BOTTOM_BORDER))
+    {
+        SR_scrollUp(8);//Scroll screen back
+        yPosition -= 8;//Push position back
+    }
 }
 
 static void screenOperation(uint16_t operation)
