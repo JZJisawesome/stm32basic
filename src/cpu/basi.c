@@ -4,28 +4,57 @@
 #include "ps2uart_cpu.h"
 #include "vhal.h"
 
-#define LINE_LENGTH 128
+//Thanks https://stackoverflow.com/questions/40591312/c-macro-how-to-get-an-integer-value-into-a-string-literal/40591483
+#define STR_IMPL_(x) #x      //stringify argument
+#define STR(x) STR_IMPL_(x)  //indirection to expand argument macros
 
-//Lines are 128 characters long
+//https://stackoverflow.com/questions/12991054/can-we-use-doubly-linked-list-in-c-without-dynamic-memory-allocation
+//http://www.c64os.com/post/basicmemorymanagement <- INCREDIBLY USEFUL
+//https://www.c64-wiki.com/wiki/Array
+//https://www.c64-wiki.com/wiki/Variable
 
+typedef struct line_t line_t;
+struct line_t
+{
+    line_t* nextLine;//If null, there is no next line
+    uint16_t lineNumber;
+    uint8_t tokens[];
+};
 
-//https://stackoverflow.com/questions/12991054/can-we-use-doubly-linked-list-in-c-without-dynamic-memory-allocation <- Useful
-
-//http://www.c64os.com/post/basicmemorymanagement <- INCREDIBLY USEFUL********************************************************************
-
-/*
 typedef struct
 {
+    //Identifiers (name and type) (2 bytes total)
+    char nameLetter1 : 7;//Only need 7 bits for ascii
+    char nameLetter2 : 7;
+    enum {REAL, INTEGER, STRING} variableType : 2;
     
-} lineEntry_t;*/
+    //Data (4 bytes)
+    union
+    {
+        //Scalar types
+        float real;
+        uint32_t integer;
+        char* string;//Points to string//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
+        
+        //Array types
+        //If a variable is accessed like an array from BASIC, transparently use these instead of the above (even though)
+        float* realArray;
+        uint32_t* integerArray;
+        char** stringArray;//Points to array of string pointers//NOTE can point to string in program memory if assigned constant in order to save dynamic memory
+    };
+} variable_t;
 
-static char lineBuffer[LINE_LENGTH];
+static char lineBuffer[BASIC_LINE_LENGTH];
+static uint8_t basicMem[BASIC_BYTES];
+static const line_t* programMemoryPointer = (line_t*)(basicMem);//Where program memory starts after run command
+static variable_t* variableMemoryStartPointer;//Should be set to byte after program memory after run command
+static variable_t* variableMemoryEndPointer;//Should be set to byte after program memory after run command (will grow to hold variables)
 
 static void interpretLine();//The heavy lifting function
 
 void BASIC_init()//Init data structures
 {
-    VHAL_drawText("????? basic bytes free :)\n");
+    VHAL_drawText(STR(BASIC_BYTES)" basic bytes free :)\n");
 }
 
 void BASIC_begin()//Begin basic interpreter
@@ -66,7 +95,7 @@ void BASIC_begin()//Begin basic interpreter
                     default:
                     {
                         //A character was typed
-                        if (lineBufferPointer < (LINE_LENGTH - 1))//Leave 1 byte for enter key
+                        if (lineBufferPointer < (BASIC_LINE_LENGTH - 1))//Leave 1 byte for enter key
                         {
                             VHAL_drawChar(key);
                             lineBuffer[lineBufferPointer] = key;
@@ -86,8 +115,10 @@ void BASIC_begin()//Begin basic interpreter
 
 static void interpretLine()
 {
-    //NOTE: only interpret up to point where null byte is encountered
+    //NOTE: only interpret lineBuffer up to point where null byte is encountered
     
     VHAL_drawText(lineBuffer);//TESTING
     VHAL_drawChar('\n');//TESTING
+    
+    //TODO tokenize, then
 }

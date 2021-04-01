@@ -3,6 +3,9 @@
 #include "softrenderer.h"
 #include "spiio_video.h"
 
+//TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
+
+//Offsets from borders to avoid text being cut off
 #define LEFT_BORDER 8
 #define RIGHT_BORDER 8
 #define TOP_BORDER 8
@@ -259,12 +262,12 @@ static void handleCharacter(char character)
         case 0x7F://Delete
         {//TODO fix this
             xPosition += 8;
-            SR_drawCharByByte(xPosition / 8, yPosition, ' ');
+            SR_drawCharByByte_OW(xPosition / 8, yPosition, ' ');
             break;
         }
         default:
         {
-            SR_drawCharByByte(xPosition / 8, yPosition, character);
+            SR_drawCharByByte_OW(xPosition / 8, yPosition, character);
             incrementCharacterPosition();
             
             break;

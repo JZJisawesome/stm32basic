@@ -5,7 +5,7 @@
 #include "spiio_video.h"
 #include "ps2uart_video.h"
 
-//TODO set interrupt priority for video sync as highest
+//TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
 
 //TODO add support for audio played on video mcu
 
@@ -30,7 +30,7 @@ void main()
     SR_setCharacterRom(vincentFont);
     SR_setFrameBuffer((uint8_t*)ramFB);
     
-    SR_drawText(1, 8,  "JZJBasic on Dual STM32F103C8T6's 40K SRAM");
+    SR_drawText(1, 8,  "JZJBasic on Dual STM32F103C8T6's (20K+20K SRAM)");
     SR_drawText(1, 16, "Copyright (c) 2021 John Jekel");
     SR_drawText(1, 24, "MIT Licensed: https://gitlab.com/JZJisawesome/stm32basic");
     

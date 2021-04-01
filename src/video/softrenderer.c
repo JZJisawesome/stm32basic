@@ -1,6 +1,8 @@
 #include "bluepill.h"
 #include "softrenderer.h"
 
+//TODO get some operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
+
 /* Private Definitions */
 //Private vars
 static uint8_t* fb;
