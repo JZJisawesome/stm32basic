@@ -9,14 +9,20 @@
 #include "spiio_cpu.h"
 
 //Helper things
-#define COMMAND(commandMajor, minorOrData) (((commandMajor) << 9) | (minorOrData))
 typedef enum {CHAR_WRITE = 0, SCREEN_OP = 1, STRING_WRITE = 2, CHAR_POS_SET = 3} commandMajor_t;
 typedef enum {CLEAR_SCROP = 0, FILL_SCROP = 1, SCROLL_UP_SCROP = 2, SCROLL_DOWN_SCROP = 3} screenOp_t;
 
-static void safeCommandPush(uint16_t command)
+static inline void safeCommandPush(commandMajor_t commandMajor, uint_fast16_t minorOrData)
 {
+    uint_fast16_t command = (commandMajor << 9) | minorOrData;
+    
     SPIIO_smartFlush();//Flush if we are out of room; block until there is
     SPIIO_push(command);//Now it's safe to push
+}
+
+static inline void screenCommand(screenOp_t screenOp)
+{
+    safeCommandPush(SCREEN_OP, (uint_fast16_t)(screenOp));
 }
 
 //Position management
@@ -27,28 +33,28 @@ void VHAL_setCharPos(uint_fast8_t x, uint_fast8_t y)
     
     uint_fast8_t coordinates = (y << 4) | x;
     
-    safeCommandPush(COMMAND(CHAR_POS_SET, coordinates));//Send coordinates
+    safeCommandPush(CHAR_POS_SET, coordinates);//Send coordinates
 }
 
 //Screen Manipulation
 void VHAL_clear()
 {
-    safeCommandPush(COMMAND(SCREEN_OP, CLEAR_SCROP));
+    screenCommand(CLEAR_SCROP);
 }
 
 void VHAL_fill()
 {
-    safeCommandPush(COMMAND(SCREEN_OP, FILL_SCROP));
+    screenCommand(FILL_SCROP);
 }
 
 void VHAL_scrollUp()
 {
-    safeCommandPush(COMMAND(SCREEN_OP, SCROLL_UP_SCROP));
+    screenCommand(SCROLL_UP_SCROP);
 }
 
 void VHAL_scrollDown()
 {
-    safeCommandPush(COMMAND(SCREEN_OP, SCROLL_DOWN_SCROP));
+    screenCommand(SCROLL_DOWN_SCROP);
 }
 
 //Text/Character drawing
@@ -60,7 +66,7 @@ void VHAL_drawChar_atPos(uint_fast8_t x, uint_fast8_t y, char character)
 
 void VHAL_drawChar(char character)
 {
-    safeCommandPush(COMMAND(CHAR_WRITE, character));
+    safeCommandPush(CHAR_WRITE, character);
 }
 
 void VHAL_drawText_atPos(uint_fast8_t x, uint_fast8_t y, const char* string)
@@ -74,7 +80,7 @@ void VHAL_drawText(const char* string)
     char character = *string;
     if (character)//String does not start with a null byte
     {
-        safeCommandPush(COMMAND(STRING_WRITE, character));//First character is sent along with string write command
+        safeCommandPush(STRING_WRITE, character);//First character is sent along with string write command
         
         while (true)
         {
@@ -86,7 +92,8 @@ void VHAL_drawText(const char* string)
             
             if (!character)//Null byte encountered
             {
-                safeCommandPush(0x00);//Send the null byte
+                SPIIO_smartFlush();//Flush if we are out of room; block until there is
+                SPIIO_push(0x00);//Send the null byte
                 break;//Stop sending string data
             }
             
@@ -95,7 +102,8 @@ void VHAL_drawText(const char* string)
             
             command |= character << 8;
             
-            safeCommandPush(command);//Send both characters at once
+            SPIIO_smartFlush();//Flush if we are out of room; block until there is
+            SPIIO_push(command);//Send both characters at once
             
             if (!character)//We do this here because we still have to send the null byte to...
                 break;//let the video mcu know the string has ended
