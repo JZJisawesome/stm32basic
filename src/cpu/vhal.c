@@ -8,42 +8,47 @@
 #include "bluepill.h"
 #include "spiio_cpu.h"
 
+//Helper things
+#define COMMAND(commandMajor, minorOrData) (((commandMajor) << 9) | (minorOrData))
+typedef enum {CHAR_WRITE = 0, SCREEN_OP = 1, STRING_WRITE = 2, CHAR_POS_SET = 3} commandMajor_t;
+typedef enum {CLEAR_SCROP = 0, FILL_SCROP = 1, SCROLL_UP_SCROP = 2, SCROLL_DOWN_SCROP = 3} screenOp_t;
+
+static void safeCommandPush(uint16_t command)
+{
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(command);//Now it's safe to push
+}
+
 //Position management
 void VHAL_setCharPos(uint_fast8_t x, uint_fast8_t y)
 {
-    SPIIO_smartFlush();
-    
     assert(x < 64);
     assert(y < 64);
     
     uint_fast8_t coordinates = (y << 4) | x;
     
-    SPIIO_push((3 << 9) | coordinates);//Send coordinates
+    safeCommandPush(COMMAND(CHAR_POS_SET, coordinates));//Send coordinates
 }
 
 //Screen Manipulation
 void VHAL_clear()
 {
-    SPIIO_smartFlush();
-    SPIIO_push((1 << 9) | 0);//Screen manipulation command 0: clear
+    safeCommandPush(COMMAND(SCREEN_OP, CLEAR_SCROP));
 }
 
 void VHAL_fill()
 {
-    SPIIO_smartFlush();
-    SPIIO_push((1 << 9) | 1);//Screen manipulation command 1: fill
+    safeCommandPush(COMMAND(SCREEN_OP, FILL_SCROP));
 }
 
 void VHAL_scrollUp()
 {
-    SPIIO_smartFlush();
-    SPIIO_push((1 << 9) | 2);//Screen manipulation command 2: scroll up
+    safeCommandPush(COMMAND(SCREEN_OP, SCROLL_UP_SCROP));
 }
 
 void VHAL_scrollDown()
 {
-    SPIIO_smartFlush();
-    SPIIO_push((1 << 9) | 3);//Screen manipulation command 3: scroll down
+    safeCommandPush(COMMAND(SCREEN_OP, SCROLL_DOWN_SCROP));
 }
 
 //Text/Character drawing
@@ -55,8 +60,7 @@ void VHAL_drawChar_atPos(uint_fast8_t x, uint_fast8_t y, char character)
 
 void VHAL_drawChar(char character)
 {
-    SPIIO_smartFlush();
-    SPIIO_push(character);//Pushing characters is designed to be fast
+    safeCommandPush(COMMAND(CHAR_WRITE, character));
 }
 
 void VHAL_drawText_atPos(uint_fast8_t x, uint_fast8_t y, const char* string)
@@ -70,8 +74,7 @@ void VHAL_drawText(const char* string)
     char character = *string;
     if (character)//String does not start with a null byte
     {
-        SPIIO_smartFlush();
-        SPIIO_push((2 << 9) | character);//First character is sent along with string write command
+        safeCommandPush(COMMAND(STRING_WRITE, character));//First character is sent along with string write command
         
         while (true)
         {
@@ -81,11 +84,10 @@ void VHAL_drawText(const char* string)
             
             command = character;
             
-            if (!character)
+            if (!character)//Null byte encountered
             {
-                SPIIO_smartFlush();
-                SPIIO_push(command);
-                break;
+                safeCommandPush(0x00);//Send the null byte
+                break;//Stop sending string data
             }
             
             ++string;
@@ -93,10 +95,9 @@ void VHAL_drawText(const char* string)
             
             command |= character << 8;
             
-            SPIIO_smartFlush();
-            SPIIO_push(command);
+            safeCommandPush(command);//Send both characters at once
             
-            if (!character)//We do this here because we still have to send the null byte to 
+            if (!character)//We do this here because we still have to send the null byte to...
                 break;//let the video mcu know the string has ended
         }
     }

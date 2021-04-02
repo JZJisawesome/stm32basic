@@ -18,21 +18,22 @@
 
 //TODO add support for audio played on video mcu
 
-static const uint8_t* frameBuffer;//Pointer to framebuffer
-static uint32_t multiCommand = 0;//0 Indicates not a multi command, other numbers indicate other things
+typedef enum {CLEAR_SCROP = 0, FILL_SCROP = 1, SCROLL_UP_SCROP = 2, SCROLL_DOWN_SCROP = 3} screenOp_t;
 
-static uint_fast16_t xPosition = 200;//Pixels
-static uint_fast16_t yPosition = 32;//Pixels
+static const uint8_t* frameBuffer;//Pointer to framebuffer
+static enum {SINGLE, STRING_WRITE_MC} multiCommand = SINGLE;
 
 static uint_fast16_t characterX = 25;//In bytes
 static uint_fast16_t characterY = 32;//In lines/pixels
 
-static uint_fast16_t scratch[8];
+//static uint_fast16_t xPosition = 200;//Pixels
+//static uint_fast16_t yPosition = 32;//Pixels
+//static uint_fast16_t scratch[8];//TODO use only this for graphical commands
 
 static void processingLoop();
 static void handleSingleCommand(uint16_t command);
 static void handleCharacter(char character);
-static void screenOperation(uint16_t operation);
+static void screenOperation(screenOp_t operation);
 static void incrementCharacterPosition();
 
 void Processing_begin(const uint8_t* fb)
@@ -56,12 +57,12 @@ static void processingLoop()
             
             switch (multiCommand)
             {
-                case 0://Not in the middle of a multi command command; parse normally
+                case SINGLE://Not in the middle of a multi command command; parse normally
                 {
                     handleSingleCommand(command);
                     break;
                 }
-                case 2://String write (more efficient than individual character writes)
+                case STRING_WRITE_MC://String write (more efficient than individual character writes)
                 {
                     char character = command & 0xFF;//Low 8 bits
                     if (character)//Check for null byte
@@ -74,18 +75,19 @@ static void processingLoop()
                             handleCharacter(character);
                         }
                         else
-                            multiCommand = 0;
+                            multiCommand = SINGLE;
                     }
                     else
-                        multiCommand = 0;
+                        multiCommand = SINGLE;
                     
                     break;
                 }
+                /*
                 case 5://Line draw from current position
                 {
                     uint32_t destYPos = command & 0x1FF;
                     SR_drawLine(xPosition, yPosition, scratch[0], destYPos);
-                    multiCommand = 0;
+                    multiCommand = SINGLE;
                     
                     //Set new current location
                     xPosition = scratch[0];
@@ -95,7 +97,7 @@ static void processingLoop()
                 case 8://Rectangle from current position
                 {
                     SR_drawRectangle(xPosition, yPosition, scratch[0], command & 0x1FF);
-                    multiCommand = 0;
+                    multiCommand = SINGLE;
                     break;
                 }
                 case 9://Triangle from current position
@@ -103,7 +105,7 @@ static void processingLoop()
                     if (scratch[4] == 3)
                     {
                         SR_drawTriangle(xPosition, yPosition, scratch[0], scratch[1], scratch[2], command & 0x1FF);
-                        multiCommand = 0;//End this command
+                        multiCommand = SINGLE;//End this command
                     }
                     else
                     {
@@ -113,6 +115,7 @@ static void processingLoop()
                     
                     break;
                 }
+                */
             }
         }
     }
@@ -120,30 +123,32 @@ static void processingLoop()
 
 static void handleSingleCommand(uint16_t command)
 {
-    switch (command >> 9)//Look at bits [15:9] for the command to execute
+    enum {CHAR_WRITE = 0, SCREEN_OP = 1, STRING_WRITE = 2, CHAR_POS_SET = 3} commandMajor = command >> 9;
+    
+    switch (commandMajor)//Look at bits [15:9] for the command to execute
     {
-        case 0://Character write
-        {//0 was chosen because it means that a character can just be sent as is from the CPU
+        case CHAR_WRITE://Character write
+        {//0 was chosen for CHAR_WRITE because it means that a character can just be sent as is from the CPU
             //NOTE: Command bits [9:7] may have additional info that can be used
             handleCharacter(command & 0x7F);
             break;
         }
-        case 1://Screen operation
+        case SCREEN_OP://Screen operation
         {
-            screenOperation(command & 0x1FF);
+            screenOperation((screenOp_t)(command & 0x1FF));
             break;
         }
-        case 2://String write (more efficient than individual character writes)
+        case STRING_WRITE://String write (more efficient than individual character writes)
         {//Ends when a null byte is encountered
             char character = command & 0xFF;
             if (character)
             {
-                multiCommand = 2;
+                multiCommand = STRING_WRITE_MC;
                 handleCharacter(character);
             }
             break;
         }
-        case 3://Set character positions
+        case CHAR_POS_SET://Set character positions
         {
             //WARNING no bounds checking
             characterX = command & 0x0F;
@@ -155,7 +160,7 @@ static void handleSingleCommand(uint16_t command)
         {
             xPosition = command & 0x1FF;
             break;
-        }*/
+        }
         case 4://Set y position
         {
             yPosition = command & 0x1FF;
@@ -198,7 +203,7 @@ static void handleSingleCommand(uint16_t command)
         {
             SR_drawCircle(xPosition, yPosition, command & 0x1FF);
             break;
-        }
+        }*/
         default:
         {
             break;
@@ -307,26 +312,26 @@ static void incrementCharacterPosition()
     }
 }
 
-static void screenOperation(uint16_t operation)
+static void screenOperation(screenOp_t operation)
 {
     switch (operation)
     {
-        case 0:
+        case CLEAR_SCROP:
         {
             SR_clear();
             break;
         }
-        case 1:
+        case FILL_SCROP:
         {
             SR_fill();
             break;
         }
-        case 2:
+        case SCROLL_UP_SCROP:
         {
             SR_scrollUp(8);
             break;
         }
-        case 3:
+        case SCROLL_DOWN_SCROP:
         {
             SR_scrollDown(8);
             break;
