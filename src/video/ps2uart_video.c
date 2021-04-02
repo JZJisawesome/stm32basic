@@ -43,7 +43,7 @@ void PS2UART_video_init()
     AFIO_EXTICR2 |= 0x00000001;//Map PB4 as exti 4
     EXTI_FTSR |= (1 << 4);//Set exti 4 to negative edge
     EXTI_IMR |= (1 << 4);//Disable interrupt mask for exti 4
-    NVIC_IPR2 |= 0x00FF0000;//Set exti 4 priority to lowest possible (ps/2 is slow so it's ok)
+    NVIC_IPR2 |= 0x00100000;//Set exti 4 priority to one below composite TIM4 (ps/2 is slow so it's not too big of a deal)
     NVIC_ISER0 = (1 << 10);//Enable exti 4 in the nvic
 }
 

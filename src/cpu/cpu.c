@@ -22,6 +22,14 @@ void main()
     
     VHAL_drawText("CPU MCU Initialized\n");
     
+    //TESTING
+/*************************************************************/
+    
+
+    while (true);
+    //TESTING end
+/*************************************************************/
+    
     BASIC_init();
     BASIC_begin();//Begin basic interpreter (never exits)
     
@@ -29,7 +37,7 @@ void main()
 /*************************************************************/
     
     //TESTING
-    
+    /*
     VHAL_drawText("????? basic bytes free :)\n");
     //VHAL_flush();
     
@@ -46,6 +54,9 @@ void main()
     //GPIOC_BRR = 1 << 13;
     VHAL_flush();
     //VHAL_clear();
+    
+    */
+    
     /*
     GPIOC_BSRR = 1 << 13;
     for (uint32_t i = 0; i < 256; ++i)
@@ -75,14 +86,14 @@ void main()
     }
     */
     //while (true);//TESTING
-    VHAL_clear();
-    VHAL_setPos(8, 8);
+    //VHAL_clear();
+    //VHAL_setPos(8, 8);
     //bool capital = false;
-    while (true)
-    {
-        if (!PS2UART_empty())
-        {
-            char character = PS2UART_pop();
+    //while (true)
+    //{
+    //    if (!PS2UART_empty())
+    //    {
+    //        char character = PS2UART_pop();
             /*
             char numString[4];
             numString[3] = 0x00;//Null byte
@@ -92,8 +103,8 @@ void main()
             VHAL_drawText(numString);
             VHAL_flush();
             */
-            VHAL_drawChar(character);
-            VHAL_flush();
+       //     VHAL_drawChar(character);
+       //     VHAL_flush();
             /*
             if ((character != 0xE0) && (character != 0xF0))
             {
@@ -102,7 +113,7 @@ void main()
                 capital = !capital;
             }
             */
-        }
+        //}
         //VHAL_flush();
         /*
         __delayInstructions(4720299);//TESTING
@@ -125,7 +136,5 @@ void main()
             VHAL_drawChar(i++);
         }
         */
-    }
-    
-    return;
+    //}
 }

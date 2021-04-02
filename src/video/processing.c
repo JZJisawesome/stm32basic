@@ -23,6 +23,10 @@ static uint32_t multiCommand = 0;//0 Indicates not a multi command, other number
 
 static uint_fast16_t xPosition = 200;//Pixels
 static uint_fast16_t yPosition = 32;//Pixels
+
+static uint_fast16_t characterX = 25;//In bytes
+static uint_fast16_t characterY = 32;//In lines/pixels
+
 static uint_fast16_t scratch[8];
 
 static void processingLoop();
