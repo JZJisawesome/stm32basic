@@ -9,10 +9,10 @@
 //TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
 
 //Offsets from borders to avoid text being cut off
-#define LEFT_BORDER 8
-#define RIGHT_BORDER 8
-#define TOP_BORDER 8
-#define BOTTOM_BORDER 16
+#define LEFT_BORDER 1//In bytes
+#define RIGHT_BORDER 1//In bytes
+#define TOP_BORDER 8//In lines/pixels
+#define BOTTOM_BORDER 16//In lines/pixels
 
 //TODO seperate out processing loop/switches from code that actually does stuff somehow
 
@@ -143,11 +143,19 @@ static void handleSingleCommand(uint16_t command)
             }
             break;
         }
+        case 3://Set character positions
+        {
+            //WARNING no bounds checking
+            characterX = command & 0x0F;
+            characterY = ((command >> 4) & 0x0F) * 8;//8 pixels/lines per character coordinate
+            break;
+        }
+        /*
         case 3://Set x position
         {
             xPosition = command & 0x1FF;
             break;
-        }
+        }*/
         case 4://Set y position
         {
             yPosition = command & 0x1FF;
@@ -233,48 +241,48 @@ static void handleCharacter(char character)
         */
         case 0x08://Backspace
         {//TODO fix this if at beginning of line
-            xPosition -= 8;
-            SR_drawCharByByte_OW(xPosition / 8, yPosition, ' ');//Overwrite with a space
+            --characterX;
+            SR_drawCharByByte_OW(characterX, characterY, ' ');//Overwrite with a space
             break;
         }
         case '\t'://Tab
         {
-            xPosition += 3 * 8;//3 spaces
+            characterX += 3;//3 spaces
             incrementCharacterPosition();//Handle fourth space with increment code to deal with wrapping
             break;
         }
         case '\n'://New line
         case '\r'://Carriage return
         {
-            xPosition = LEFT_BORDER;
+            characterX = LEFT_BORDER;
         }//Fallthrough
         case '\v'://Vertical tab
         {
-            yPosition += 8;
+            characterY += 8;
             
-            if (yPosition >= (PROCESSING_LINES - BOTTOM_BORDER))
+            if (characterY >= (PROCESSING_LINES - BOTTOM_BORDER))
             {
                 SR_scrollUp(8);//Scroll screen back
-                yPosition -= 8;
+                characterY -= 8;
             }
             
             break;
         }
         case 0x0C://Form feed
         {//TODO is this what this should do?
-            xPosition = LEFT_BORDER;
-            yPosition = TOP_BORDER;
+            characterX = LEFT_BORDER;
+            characterY = TOP_BORDER;
             break;
         }
         case 0x7F://Delete
         {//TODO fix this
-            xPosition += 8;
-            SR_drawCharByByte_OW(xPosition / 8, yPosition, ' ');
+            ++characterX;
+            SR_drawCharByByte_OW(characterX, characterY, ' ');
             break;
         }
         default:
         {
-            SR_drawCharByByte_OW(xPosition / 8, yPosition, character);
+            SR_drawCharByByte_OW(characterX, characterY, character);
             incrementCharacterPosition();
             
             break;
@@ -284,18 +292,18 @@ static void handleCharacter(char character)
 
 static void incrementCharacterPosition()
 {
-    xPosition += 8;
+    ++characterX;
     
-    if ((xPosition / 8) >= (PROCESSING_BYTES_PER_LINE - (RIGHT_BORDER / 8)))
+    if (characterX >= (PROCESSING_BYTES_PER_LINE - (RIGHT_BORDER / 8)))
     {
-        xPosition = LEFT_BORDER;//Wrap
-        yPosition += 8;
+        characterX = LEFT_BORDER;//Wrap
+        characterY += 8;
     }
     
-    if (yPosition >= (PROCESSING_LINES - BOTTOM_BORDER))
+    if (characterY >= (PROCESSING_LINES - BOTTOM_BORDER))
     {
         SR_scrollUp(8);//Scroll screen back
-        yPosition -= 8;//Push position back
+        characterY -= 8;//Push position back
     }
 }
 

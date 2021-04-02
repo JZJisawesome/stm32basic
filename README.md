@@ -71,10 +71,11 @@ Major commands
 0x00: Character write (bits 6:0)
 0x01: Screen operation based on bits 8:0
 0x02: String write (multicommand)
+0x03: Character position set
 
 TODO add more/finalize the rest
 
-#### Commands with minor commands
+#### Regular command info
 
 ##### Screen operation (minor commands)
 
@@ -83,7 +84,12 @@ TODO add more/finalize the rest
 0x002: Screen character scroll up (8 pixels)
 0x003: Screen character scroll down (8 pixels)
 
-#### Multicommand-commands
+##### Character position set
+
+Bits 3:0 are the new x character coordinates. Bits 7:4 are the new y character coordinates.
+Both are in bytes, not pixels
+
+#### Multicommand info
 
 Useful for commands that require > 9 bits of data to do things/want to be more efficient.
 Will take 16 bits of info until they have enough (in addition to initial 9 bits), then will drop back to regular commands.

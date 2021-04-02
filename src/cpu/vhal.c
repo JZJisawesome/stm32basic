@@ -1,6 +1,7 @@
 #include "vhal.h" 
 
 #include <stdint.h>
+#include <assert.h>
 
 //TODO add support for audio played on video mcu
 
@@ -8,12 +9,16 @@
 #include "spiio_cpu.h"
 
 //Position management
-void VHAL_setPos(uint16_t x, uint16_t y)
+void VHAL_setCharPos(uint_fast8_t x, uint_fast8_t y)
 {
     SPIIO_smartFlush();
-    SPIIO_push((3 << 9) | x);//Set x position
-    SPIIO_smartFlush();
-    SPIIO_push((4 << 9) | y);//Set y position
+    
+    assert(x < 64);
+    assert(y < 64);
+    
+    uint_fast8_t coordinates = (y << 4) | x;
+    
+    SPIIO_push((3 << 9) | coordinates);//Send coordinates
 }
 
 //Screen Manipulation
@@ -42,9 +47,9 @@ void VHAL_scrollDown()
 }
 
 //Text/Character drawing
-void VHAL_drawChar_atPos(uint16_t x, uint16_t y, char character)
+void VHAL_drawChar_atPos(uint_fast8_t x, uint_fast8_t y, char character)
 {
-    VHAL_setPos(x, y);
+    VHAL_setCharPos(x, y);
     VHAL_drawChar(character);
 }
 
@@ -54,9 +59,9 @@ void VHAL_drawChar(char character)
     SPIIO_push(character);//Pushing characters is designed to be fast
 }
 
-void VHAL_drawText_atPos(uint16_t x, uint16_t y, const char* string)
+void VHAL_drawText_atPos(uint_fast8_t x, uint_fast8_t y, const char* string)
 {
-    VHAL_setPos(x, y);
+    VHAL_setCharPos(x, y);
     VHAL_drawText(string);
 }
 
@@ -70,7 +75,7 @@ void VHAL_drawText(const char* string)
         
         while (true)
         {
-            uint16_t command;
+            uint_fast16_t command;
             ++string;
             character = *string;
             
@@ -98,6 +103,7 @@ void VHAL_drawText(const char* string)
 }
 
 //Line drawing
+/*
 void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
     VHAL_setPos(x0, y0);
@@ -156,3 +162,4 @@ void VHAL_drawCircle(uint32_t radius)
     SPIIO_smartFlush();
     SPIIO_push((10 << 9) | radius);
 }
+*/
