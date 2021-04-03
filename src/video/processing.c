@@ -18,17 +18,41 @@
 
 //TODO add support for audio played on video mcu
 
-typedef enum {CLEAR_SCROP = 0, FILL_SCROP = 1, SCROLL_UP_SCROP = 2, SCROLL_DOWN_SCROP = 3} screenOp_t;
+//Typedefs
+
+typedef enum
+{
+    CHAR_WRITE = 0x00, SCREEN_OP = 0x01, STRING_WRITE = 0x02, CHAR_POS_SET = 0x03,
+    LINE_DRAW = 0x04, HLINE_DRAW = 0x05, VLINE_DRAW = 0x06, POLY_DRAW = 0x07,//TODO implement (except for LINE_DRAW)
+    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09//TODO implement
+} commandMajor_t;
+typedef enum {CLEAR_SCROP = 0x000, FILL_SCROP = 0x001, SCROLL_UP_SCROP = 0x002, SCROLL_DOWN_SCROP = 0x003} screenOp_t;//TODO implement
+typedef enum
+{
+    STOP_ALL_AUOP = 0x000,//TODO implement
+    STOP_CHANNEL0_AUOP = 0x001, NOTE_QUEUE_CHANNEL0_AUOP = 0x002,//TODO implement
+    STOP_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x102//TODO implement
+} audioOp_t;
+
+//Static vars
+
+static enum
+{
+    SINGLE, STRING_WRITE_MC, LINE_DRAW_MC, HLINE_DRAW_MC,
+    VLINE_DRAW_MC, POLY_DRAW_MC, CIRCLE_DRAW_MC, AUDIO_OP_MC
+    
+} multiCommand = SINGLE;
 
 static const uint8_t* frameBuffer;//Pointer to framebuffer
-static enum {SINGLE, STRING_WRITE_MC} multiCommand = SINGLE;
 
 static uint_fast16_t characterX = 25;//In bytes
 static uint_fast16_t characterY = 32;//In lines/pixels
+static uint_fast16_t scratch[8];
 
 //static uint_fast16_t xPosition = 200;//Pixels
 //static uint_fast16_t yPosition = 32;//Pixels
-//static uint_fast16_t scratch[8];//TODO use only this for graphical commands
+
+//Functions
 
 static void processingLoop();
 static void handleSingleCommand(uint16_t command);
@@ -75,11 +99,45 @@ static void processingLoop()
                             handleCharacter(character);
                         }
                         else
-                            multiCommand = SINGLE;
+                            multiCommand = SINGLE;//Exit multi command
                     }
                     else
-                        multiCommand = SINGLE;
+                        multiCommand = SINGLE;//Exit multi command
                     
+                    break;
+                }
+                case LINE_DRAW_MC:
+                {
+                    if (scratch[4] == 3)
+                    {
+                        SR_drawLine(scratch[0], scratch[1], scratch[2], command & 0x1FF);
+                        multiCommand = SINGLE;//Exit multi command
+                    }
+                    else
+                    {
+                        scratch[scratch[4]] = command & 0x1FF;
+                        ++scratch[4];
+                    }
+                    break;
+                }
+                case HLINE_DRAW_MC:
+                {
+                    break;
+                }
+                case VLINE_DRAW_MC:
+                {
+                    break;
+                }
+                case POLY_DRAW_MC:
+                {
+                    break;
+                }
+                case CIRCLE_DRAW_MC:
+                {
+                    break;
+                }
+                case AUDIO_OP_MC:
+                {
                     break;
                 }
                 /*
@@ -123,7 +181,7 @@ static void processingLoop()
 
 static void handleSingleCommand(uint16_t command)
 {
-    enum {CHAR_WRITE = 0, SCREEN_OP = 1, STRING_WRITE = 2, CHAR_POS_SET = 3} commandMajor = command >> 9;
+    commandMajor_t commandMajor = (commandMajor_t)(command >> 9);
     
     switch (commandMajor)//Look at bits [15:9] for the command to execute
     {
@@ -153,6 +211,33 @@ static void handleSingleCommand(uint16_t command)
             //WARNING no bounds checking
             characterX = command & 0x0F;
             characterY = ((command >> 4) & 0x0F) * 8;//8 pixels/lines per character coordinate
+            break;
+        }
+        case LINE_DRAW:
+        {
+            scratch[0] = command & 0x1FF;//x0
+            multiCommand = LINE_DRAW_MC;
+            scratch[4] = 1;//scratch[4] contains next coordinate to get
+            break;
+        }
+        case HLINE_DRAW:
+        {
+            break;
+        }
+        case VLINE_DRAW:
+        {
+            break;
+        }
+        case POLY_DRAW:
+        {
+            break;
+        }
+        case CIRCLE_DRAW:
+        {
+            break;
+        }
+        case AUDIO_OP:
+        {
             break;
         }
         /*

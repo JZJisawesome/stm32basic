@@ -9,8 +9,19 @@
 #include "spiio_cpu.h"
 
 //Helper things
-typedef enum {CHAR_WRITE = 0, SCREEN_OP = 1, STRING_WRITE = 2, CHAR_POS_SET = 3} commandMajor_t;
-typedef enum {CLEAR_SCROP = 0, FILL_SCROP = 1, SCROLL_UP_SCROP = 2, SCROLL_DOWN_SCROP = 3} screenOp_t;
+typedef enum
+{
+    CHAR_WRITE = 0x00, SCREEN_OP = 0x01, STRING_WRITE = 0x02, CHAR_POS_SET = 0x03,
+    LINE_DRAW = 0x04, HLINE_DRAW = 0x05, VLINE_DRAW = 0x06, POLY_DRAW = 0x07,
+    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09
+} commandMajor_t;
+typedef enum {CLEAR_SCROP = 0x000, FILL_SCROP = 0x001, SCROLL_UP_SCROP = 0x002, SCROLL_DOWN_SCROP = 0x003} screenOp_t;
+typedef enum
+{
+    STOP_ALL_AUOP = 0x000,
+    STOP_CHANNEL0_AUOP = 0x001, NOTE_QUEUE_CHANNEL0_AUOP = 0x002,
+    STOP_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x102
+} audioOp_t;
 
 static inline void safeCommandPush(commandMajor_t commandMajor, uint_fast16_t minorOrData)
 {
@@ -112,6 +123,16 @@ void VHAL_drawText(const char* string)
 }
 
 //Line drawing
+void VHAL_drawLine(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1)
+{
+    safeCommandPush(LINE_DRAW, x0);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y0);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(x1);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y1);
+}
 /*
 void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {

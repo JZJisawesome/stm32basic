@@ -72,6 +72,7 @@ Major commands
 0x01: Screen operation based on bits 8:0
 0x02: String write (multicommand)
 0x03: Character position set
+0x04: Line Draw
 
 TODO add more/finalize the rest
 
@@ -100,6 +101,13 @@ Like multiple character writes, but more efficient (holding 2 characters per 16 
 First command provides 1st character in bits 6:0.
 Additional pairs of 2 characters are sent in following commands. The first is in bits 6:0, the second in 14:8
 When a null byte is encountered, the command stops
+
+##### Line draw
+
+Pixel coordinates are 9 bits. 1st x coordinate are sent with command (bits 8:0)
+1st y coordinate is sent as bits 8:0 of next 16 transfer
+2nd x coordinate is sent as bits 8:0 of next 16 transfer
+2nd y coordinate is sent as bits 8:0 of next 16 transfer
 
 ### BASIC Tokens (line_t.tokens)
 

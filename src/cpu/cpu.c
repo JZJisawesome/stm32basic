@@ -27,6 +27,7 @@ void main()
     
     //VHAL_drawText_atPos(25, 25, "TEST");
     //VHAL_drawText("Testing 2");
+    VHAL_drawLine(0, 0, 400, 240);
     //while (true);
     //TESTING end
 /*************************************************************/
