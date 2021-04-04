@@ -16,9 +16,10 @@ typedef enum
 
 typedef enum
 {
-    STOP_ALL_AUOP = 0x000, START_ALL_AUOP = 0x100,//Useful for synchronizing both channels//TODO implement
-    STOP_CHANNEL0_AUOP = 0x001, START_CHANNEL0_AUOP = 0x002, NOTE_QUEUE_CHANNEL0_AUOP = 0x003,//TODO implement
-    STOP_CHANNEL1_AUOP = 0x102, START_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x103//TODO implement
+    RESET_AUOP,//Resets audio registers and things back to normal
+    FREQ_SET0_AUOP, FREQ_SET1_AUOP, FREQ_SET2_AUOP
+    //TODO add sweeping functionality and random (noise) mode
+    
 } spiAudioOp_t;
 
 //PS/2 Commands

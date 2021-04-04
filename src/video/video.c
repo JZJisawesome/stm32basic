@@ -1,11 +1,14 @@
 #include <stdint.h>
 
+#include <stdint.h>
+
 #include "composite.h"
 #include "softrenderer.h"
 #include "vincent.h"//8x8 Font
 #include "processing.h"
 #include "spiio_video.h"
 #include "ps2uart_video.h"
+#include "audio.h"
 
 //NOTE: Unfortunatly, newlib takes up 100 bytes of space
 //TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
@@ -45,10 +48,11 @@ void main()
     }
     
     //Init code
-    Composite_init((uint8_t*)ramFB);//First that way project information is displayed during initialization
+    Composite_init((uint8_t*)ramFB);
     
     //TODO Do other init code here
     PS2UART_video_init();
+    Audio_init();
     SPIIO_video_init();//Should be last thing to initialize
     
     SR_drawText(1, 32, "Video MCU Initialized : ");

@@ -1,12 +1,13 @@
 #include "processing.h" 
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "bluepill.h"
 #include "communication_defs.h"
 #include "softrenderer.h"
 #include "spiio_video.h"
-#include "assert.h"
+#include "audio.h"
 
 //TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
 
@@ -338,8 +339,29 @@ static void audioOperation(spiAudioOp_t operation)
 {
     switch (operation)
     {
-        //TODO
-        //Or should this be done over uart?
-        //TODO make it so there is no buffering, just setting the current tone
+        //TODO add sweeping functionality and random (noise) mode
+        case RESET_AUOP:
+        {
+            Audio_reset();
+            break;
+        }
+        case FREQ_SET0_AUOP:
+        {
+            while (SPIIO_empty());//Wait for data
+            Audio_setFreq0(SPIIO_pop());
+            break;
+        }
+        case FREQ_SET1_AUOP:
+        {
+            while (SPIIO_empty());//Wait for data
+            Audio_setFreq1(SPIIO_pop());
+            break;
+        }
+        case FREQ_SET2_AUOP:
+        {
+            while (SPIIO_empty());//Wait for data
+            Audio_setFreq2(SPIIO_pop());
+            break;
+        }
     }
 }
