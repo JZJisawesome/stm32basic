@@ -26,12 +26,40 @@ static inline void screenCommand(spiScreenOp_t screenOp)
 //Position management
 void VHAL_setCharPos(uint_fast8_t x, uint_fast8_t y)
 {
-    assert(x < 64);
-    assert(y < 64);
+    safeCommandPush(CHAR_POS_SET, x);//Send x coordinate
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y);//Send y coordinate
+}
+
+void VHAL_setCharRelPos(int_fast8_t offsetX, int_fast8_t offsetY)
+{
+    //Cast int_fast8_t to uint_fast16_t, but don't sign extend; just copy lower 8 bits
+    //(get rid of sign extended bits by anding with 0xFF)
+    uint_fast16_t offsetX16Bit = (uint_fast16_t)(offsetX) & 0xFF;
+    uint_fast16_t offsetY16Bit = (uint_fast16_t)(offsetY) & 0xFF;
     
-    uint_fast8_t coordinates = (y << 4) | x;
-    
-    safeCommandPush(CHAR_POS_SET, coordinates);//Send coordinates
+    safeCommandPush(CHAR_RELX_POS_SET, offsetX16Bit);//Send x offset
+    safeCommandPush(CHAR_RELY_POS_SET, offsetY16Bit);//Send y offset
+}
+
+void VHAL_moveCharPosLeft()
+{
+    safeCommandPush(CHAR_RELX_POS_SET, (uint_fast16_t)(-1) & 0xFF);//Send x offset
+}
+
+void VHAL_moveCharPosRight()
+{
+    safeCommandPush(CHAR_RELX_POS_SET, 1);//Send x offset
+}
+
+void VHAL_moveCharPosUp()
+{
+    safeCommandPush(CHAR_RELY_POS_SET, (uint_fast16_t)(-1) & 0xFF);//Send y offset
+}
+
+void VHAL_moveCharPosDown()
+{
+    safeCommandPush(CHAR_RELY_POS_SET, 1);//Send y offset
 }
 
 //Screen Manipulation
@@ -120,23 +148,43 @@ void VHAL_drawLine(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fa
     SPIIO_smartFlush();//Flush if we are out of room; block until there is
     SPIIO_push(y1);
 }
-/*
-void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+
+void VHAL_drawHLine(uint_fast16_t x, uint_fast16_t y, uint_fast16_t length)
 {
-    VHAL_setPos(x0, y0);
-    VHAL_drawLineTo(x1, y1);
+    safeCommandPush(HLINE_DRAW, x);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(length);
 }
 
-void VHAL_drawLineTo(uint16_t x, uint16_t y)
+void VHAL_drawVLine(uint_fast16_t x, uint_fast16_t y, uint_fast16_t length)
 {
-    SPIIO_smartFlush();
-    SPIIO_push((5 << 9) | x);//Start multi command transfer of line coords and send x
-    SPIIO_smartFlush();
-    SPIIO_push(y);//End with sending y coordinate
+    safeCommandPush(VLINE_DRAW, x);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(length);
 }
-*/
 
 //Shape drawing
+void VHAL_drawTriangle(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint_fast16_t x2, uint_fast16_t y2)
+{
+    safeCommandPush(POLY_DRAW, 3);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(x0);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y0);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(x1);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y1);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(x2);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y2);
+}
+
 void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius)
 {
     safeCommandPush(CIRCLE_DRAW, x);

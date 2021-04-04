@@ -70,11 +70,16 @@ Bits 8:0 are data or for minor commands
 Major commands
 0x00: Character write (bits 6:0)
 0x01: Screen operation based on bits 8:0
-0x02: String write (multicommand)
+0x02: String write
 0x03: Character position set
 0x04: Line Draw
-
+0x05: H line draw
+0x06: V line draw
+0x07: Polygon draw
 0x08: Circle draw
+
+0x0A: Character relative position set x
+0x0B: Character relative position set y
 
 TODO add more/finalize the rest
 
@@ -87,10 +92,9 @@ TODO add more/finalize the rest
 0x002: Screen character scroll up (8 pixels)
 0x003: Screen character scroll down (8 pixels)
 
-##### Character position set
+##### Character relative position set x and y
 
-Bits 3:0 are the new x character coordinates. Bits 7:4 are the new y character coordinates.
-Both are in bytes, not pixels
+Bits 7:0 of command provide offset for new x or y position (twos complement) from current position (offset)
 
 #### Multicommand info
 
@@ -104,6 +108,11 @@ First command provides 1st character in bits 6:0.
 Additional pairs of 2 characters are sent in following commands. The first is in bits 6:0, the second in 14:8
 When a null byte is encountered, the command stops
 
+##### Character position set
+
+1st 8 bits (part of command) is x (characterX, so steps of 8 pixels)
+2nd 8 bits is y (characterY, so steps of 8 pixels)
+
 ##### Line draw
 
 Pixel coordinates are 9 bits. 1st x coordinate are sent with command (bits 8:0)
@@ -111,10 +120,25 @@ Pixel coordinates are 9 bits. 1st x coordinate are sent with command (bits 8:0)
 2nd x coordinate is sent as bits 8:0 of next 16 transfer
 2nd y coordinate is sent as bits 8:0 of next 16 transfer
 
+##### H and V line draw
+
+All data is 9 bits (8:0)
+1st (part of command) is x
+2nd is y
+3rd is length (either horizontal or vertical)
+
+##### Polygon draw
+
+All data is 9 bits (8:0)
+1st (part of command) is number of vertices (the number of pairs to send)
+Pairs of coordinates are sent
+
+The command connects lines between the vertices in the order they are sent, then connects the last pair to the first
+
 ##### Circle draw
 
 All data is 9 bits (8:0)
-1st is x
+1st (part of command) is x
 2nd is y
 3rd is radius
 

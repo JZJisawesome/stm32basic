@@ -15,7 +15,11 @@
 
 //Position management
 void VHAL_setCharPos(uint_fast8_t x, uint_fast8_t y);//Character, not pixel, coordinates
-//void VHAL_setPos(uint16_t x, uint16_t y);
+void VHAL_setCharRelPos(int_fast8_t offsetX, int_fast8_t offsetY);//Character, not pixel, coordinates
+void VHAL_moveCharPosLeft();
+void VHAL_moveCharPosRight();
+void VHAL_moveCharPosUp();
+void VHAL_moveCharPosDown();
 
 //Screen Manipulation
 void VHAL_clear();
@@ -31,14 +35,12 @@ void VHAL_drawText(const char* string);
 
 //Line drawing
 void VHAL_drawLine(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1);
-//TODO horizontal and vertical line support
-
-//void VHAL_drawLine_atPos(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-//void VHAL_drawLineTo(uint16_t x, uint16_t y);
+void VHAL_drawHLine(uint_fast16_t x, uint_fast16_t y, uint_fast16_t length);
+void VHAL_drawVLine(uint_fast16_t x, uint_fast16_t y, uint_fast16_t length);
 
 //Shape drawing
 void VHAL_drawRectangle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t xCount, uint_fast16_t yCount);//TODO
-void VHAL_drawTriangle(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint_fast16_t x2, uint_fast16_t y2);//TODO
+void VHAL_drawTriangle(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint_fast16_t x2, uint_fast16_t y2);
 void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius);
 
 //void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount);

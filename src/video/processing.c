@@ -6,6 +6,7 @@
 #include "communication_defs.h"
 #include "softrenderer.h"
 #include "spiio_video.h"
+#include "assert.h"
 
 //TODO get softrenderer operations to use dma for memory copying (ex scrolling, clearing, filling, etc)
 
@@ -107,8 +108,9 @@ static void handleCommand(uint16_t command)
         case CHAR_POS_SET://Set character positions
         {
             //WARNING no bounds checking
-            characterX = command & 0x0F;
-            characterY = ((command >> 4) & 0x0F) * 8;//8 pixels/lines per character coordinate
+            characterX = command & 0xFF;
+            while (SPIIO_empty());//Wait for data
+            characterY = (SPIIO_pop() & 0xFF) * 8;
             break;
         }
         case LINE_DRAW:
@@ -128,15 +130,63 @@ static void handleCommand(uint16_t command)
         }
         case HLINE_DRAW:
         {
-            break;//TODO
+            uint32_t x = command & 0x1FF;
+            uint32_t y, length;
+            
+            while (SPIIO_empty());//Wait for data
+            y = SPIIO_pop() & 0x1FF;
+            while (SPIIO_empty());//Wait for data
+            length = SPIIO_pop() & 0x1FF;
+            
+            SR_drawHLine(x, y, length);
+            break;
         }
         case VLINE_DRAW:
         {
-            break;//TODO
+            uint32_t x = command & 0x1FF;
+            uint32_t y, length;
+            
+            while (SPIIO_empty());//Wait for data
+            y = SPIIO_pop() & 0x1FF;
+            while (SPIIO_empty());//Wait for data
+            length = SPIIO_pop() & 0x1FF;
+            
+            SR_drawVLine(x, y, length);
+            break;
         }
         case POLY_DRAW:
         {
-            break;//TODO
+            uint32_t amount = command & 0x1FF;//How many points to connect
+            
+            assert(amount > 1);
+            
+            uint32_t currentX, currentY, previousX, previousY, firstX, firstY;
+            
+            //Handle the first point ourselves
+            while (SPIIO_empty());//Wait for data
+            firstX = SPIIO_pop() & 0x1FF;
+            previousX = firstX;
+            while (SPIIO_empty());//Wait for data
+            firstY = SPIIO_pop() & 0x1FF;
+            previousY = firstY;
+            --amount;
+            
+            for (uint32_t i = 0; i < amount; ++i)
+            {
+                while (SPIIO_empty());//Wait for data
+                currentX = SPIIO_pop() & 0x1FF;
+                while (SPIIO_empty());//Wait for data
+                currentY = SPIIO_pop() & 0x1FF;
+                
+                SR_drawLine(previousX, previousY, currentX, currentY);
+                
+                previousX = currentX;
+                previousY = currentY;
+            }
+            
+            SR_drawLine(previousX, previousY, firstX, firstY);//Finish the polygon
+            
+            break;
         }
         case CIRCLE_DRAW:
         {
@@ -150,11 +200,25 @@ static void handleCommand(uint16_t command)
             
             SR_drawCircle(x, y, radius);
             
-            break;//TODO
+            break;
         }
         case AUDIO_OP:
         {
             break;//TODO
+        }
+        case CHAR_RELX_POS_SET:
+        {
+            //TODO keep in bounds
+            int8_t offsetX = (int8_t)(command & 0xFF);
+            characterX += offsetX;
+            break;
+        }
+        case CHAR_RELY_POS_SET:
+        {
+            //TODO keep in bounds
+            int8_t offsetY = (int8_t)(command & 0xFF);
+            characterY += offsetY * 8;
+            break;
         }
         default:
         {

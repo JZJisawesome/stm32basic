@@ -24,10 +24,14 @@ void main()
     
 /*TESTING***************************************************************/
     
-    //VHAL_drawText_atPos(25, 25, "TEST");
+    //VHAL_drawText_atPos(25, 10, "TEST");
+    //VHAL_setCharRelPos(-4, -2);
     //VHAL_drawText("Testing 2");
     //VHAL_drawLine(0, 0, 400, 240);
     //VHAL_drawCircle(200, 120, 20);
+    //VHAL_drawHLine(10, 10, 50);
+    //VHAL_drawVLine(25, 10, 60);
+    //VHAL_drawTriangle(200, 0, 0, 250, 400, 250);
     //while (true);
     
 /*TESTING end***********************************************************/
