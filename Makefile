@@ -16,7 +16,7 @@ LINKEROPTS = -ffreestanding -nostartfiles -Wl,--print-memory-usage -Wl,-T,bluepi
 #https://stackoverflow.com/questions/17515362/lpcxpresso-with-cortex-m3-what-is-libc-alib-a-impure-o-any-why-is-it-using-1k
 
 #TODO seperate out into common deps, cpu deps, and video deps
-DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2uart_cpu.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart_video.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
+DEPS = $(INCDIR)/common/bluepill.h $(INCDIR)/common/communication_defs.h $(INCDIR)/cpu/basi.h $(INCDIR)/cpu/ps2uart_cpu.h $(INCDIR)/cpu/spiio_cpu.h $(INCDIR)/cpu/vhal.h $(INCDIR)/video/composite.h $(INCDIR)/video/processing.h $(INCDIR)/video/ps2uart_video.h $(INCDIR)/video/softrenderer.h $(INCDIR)/video/spiio_video.h $(INCDIR)/video/vincent.h
 
 .PHONY: release debug
 release: CFLAGS += -Ofast -DNDEBUG $(COMMONOPTIMIZINGCFLAGS)

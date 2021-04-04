@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "bluepill.h"
+#include "communication_defs.h"
 #include "softrenderer.h"
 #include "spiio_video.h"
 
@@ -18,46 +19,21 @@
 
 //TODO add support for audio played on video mcu
 
-//Typedefs
-
-typedef enum
-{
-    CHAR_WRITE = 0x00, SCREEN_OP = 0x01, STRING_WRITE = 0x02, CHAR_POS_SET = 0x03,
-    LINE_DRAW = 0x04, HLINE_DRAW = 0x05, VLINE_DRAW = 0x06, POLY_DRAW = 0x07,//TODO implement (except for LINE_DRAW)
-    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09//TODO implement
-} commandMajor_t;
-typedef enum {CLEAR_SCROP = 0x000, FILL_SCROP = 0x001, SCROLL_UP_SCROP = 0x002, SCROLL_DOWN_SCROP = 0x003} screenOp_t;//TODO implement
-typedef enum
-{
-    STOP_ALL_AUOP = 0x000, START_ALL_AUOP = 0x100,//Useful for synchronizing both channels//TODO implement
-    STOP_CHANNEL0_AUOP = 0x001, START_CHANNEL0_AUOP = 0x002, NOTE_QUEUE_CHANNEL0_AUOP = 0x003,//TODO implement
-    STOP_CHANNEL1_AUOP = 0x102, START_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x103//TODO implement
-} audioOp_t;
+//TODO add support for relative character position moving
 
 //Static vars
-
-static enum
-{
-    SINGLE, STRING_WRITE_MC, LINE_DRAW_MC, HLINE_DRAW_MC,
-    VLINE_DRAW_MC, POLY_DRAW_MC, CIRCLE_DRAW_MC, AUDIO_OP_MC
-    
-} multiCommand = SINGLE;
 
 static const uint8_t* frameBuffer;//Pointer to framebuffer
 
 static uint_fast16_t characterX = 25;//In bytes
 static uint_fast16_t characterY = 32;//In lines/pixels
-static uint_fast16_t scratch[8];
-
-//static uint_fast16_t xPosition = 200;//Pixels
-//static uint_fast16_t yPosition = 32;//Pixels
 
 //Functions
 
 static void processingLoop();
-static void handleSingleCommand(uint16_t command);
+static void handleCommand(uint16_t command);
 static void handleCharacter(char character);
-static void screenOperation(screenOp_t operation);
+static void screenOperation(spiScreenOp_t operation);
 static void incrementCharacterPosition();
 
 void Processing_begin(const uint8_t* fb)
@@ -76,123 +52,13 @@ static void processingLoop()
             //__wfi();
             ((void)0);//TESTING Debugging dies if this is wfi; change to wfi at end of development if possible
         else
-        {
-            uint16_t command = SPIIO_pop();
-            
-            switch (multiCommand)
-            {
-                case SINGLE://Not in the middle of a multi command command; parse normally
-                {
-                    handleSingleCommand(command);
-                    break;
-                }
-                case STRING_WRITE_MC://String write (more efficient than individual character writes)
-                {
-                    char character = command & 0xFF;//Low 8 bits
-                    if (character)//Check for null byte
-                    {
-                        handleCharacter(character);
-                        
-                        character = command >> 8;//Upper 8 bits
-                        if (character)//Check for null byte
-                        {
-                            handleCharacter(character);
-                        }
-                        else
-                            multiCommand = SINGLE;//Exit multi command
-                    }
-                    else
-                        multiCommand = SINGLE;//Exit multi command
-                    
-                    break;
-                }
-                case LINE_DRAW_MC:
-                {
-                    if (scratch[4] == 3)
-                    {
-                        SR_drawLine(scratch[0], scratch[1], scratch[2], command & 0x1FF);
-                        multiCommand = SINGLE;//Exit multi command
-                    }
-                    else
-                    {
-                        scratch[scratch[4]] = command & 0x1FF;
-                        ++scratch[4];
-                    }
-                    break;
-                }
-                case HLINE_DRAW_MC:
-                {
-                    break;//TODO
-                }
-                case VLINE_DRAW_MC:
-                {
-                    break;//TODO
-                }
-                case POLY_DRAW_MC:
-                {
-                    break;//TODO
-                }
-                case CIRCLE_DRAW_MC:
-                {
-                    if (scratch[4] == 2)
-                    {
-                        SR_drawCircle(scratch[0], scratch[1], command & 0x1FF);
-                        multiCommand = SINGLE;//Exit multi command
-                    }
-                    else
-                    {
-                        scratch[1] = command & 0x1FF;//y
-                        ++scratch[4];
-                    }   
-                    
-                    break;//TODO
-                }
-                case AUDIO_OP_MC:
-                {
-                    break;//TODO
-                }
-                /*
-                case 5://Line draw from current position
-                {
-                    uint32_t destYPos = command & 0x1FF;
-                    SR_drawLine(xPosition, yPosition, scratch[0], destYPos);
-                    multiCommand = SINGLE;
-                    
-                    //Set new current location
-                    xPosition = scratch[0];
-                    yPosition = destYPos;
-                    break;
-                }
-                case 8://Rectangle from current position
-                {
-                    SR_drawRectangle(xPosition, yPosition, scratch[0], command & 0x1FF);
-                    multiCommand = SINGLE;
-                    break;
-                }
-                case 9://Triangle from current position
-                {
-                    if (scratch[4] == 3)
-                    {
-                        SR_drawTriangle(xPosition, yPosition, scratch[0], scratch[1], scratch[2], command & 0x1FF);
-                        multiCommand = SINGLE;//End this command
-                    }
-                    else
-                    {
-                        scratch[scratch[4]] = command & 0x1FF;//Save coords
-                        scratch[4] += 1;
-                    }
-                    
-                    break;
-                }
-                */
-            }
-        }
+            handleCommand(SPIIO_pop());
     }
 }
 
-static void handleSingleCommand(uint16_t command)
+static void handleCommand(uint16_t command)
 {
-    commandMajor_t commandMajor = (commandMajor_t)(command >> 9);
+    spiMajorCommand_t commandMajor = (spiMajorCommand_t)(command >> 9);
     
     switch (commandMajor)//Look at bits [15:9] for the command to execute
     {
@@ -204,17 +70,38 @@ static void handleSingleCommand(uint16_t command)
         }
         case SCREEN_OP://Screen operation
         {
-            screenOperation((screenOp_t)(command & 0x1FF));
+            screenOperation((spiScreenOp_t)(command & 0x1FF));
             break;
         }
         case STRING_WRITE://String write (more efficient than individual character writes)
         {//Ends when a null byte is encountered
-            char character = command & 0xFF;
+            char character = command & 0x7F;
             if (character)
             {
-                multiCommand = STRING_WRITE_MC;
                 handleCharacter(character);
+                
+                bool nullByteEncountered = false;
+                while (!nullByteEncountered)
+                {
+                    while (SPIIO_empty());//Wait for data
+                    uint16_t data = SPIIO_pop();
+                    
+                    character = data & 0x7F;
+                    if (character != 0x00)
+                    {
+                        handleCharacter(character);
+                        
+                        character = (data >> 8) & 0x7F;
+                        if (character != 0x00)
+                            handleCharacter(character);
+                        else
+                            nullByteEncountered = true;
+                    }
+                    else
+                        nullByteEncountered = true;
+                }
             }
+            
             break;
         }
         case CHAR_POS_SET://Set character positions
@@ -226,9 +113,17 @@ static void handleSingleCommand(uint16_t command)
         }
         case LINE_DRAW:
         {
-            scratch[0] = command & 0x1FF;//x
-            multiCommand = LINE_DRAW_MC;
-            scratch[4] = 1;//scratch[4] contains next coordinate to get
+            uint32_t x0 = command & 0x1FF;
+            uint32_t y0, x1, y1;
+            
+            while (SPIIO_empty());//Wait for data
+            y0 = SPIIO_pop() & 0x1FF;
+            while (SPIIO_empty());//Wait for data
+            x1 = SPIIO_pop() & 0x1FF;
+            while (SPIIO_empty());//Wait for data
+            y1 = SPIIO_pop() & 0x1FF;
+            
+            SR_drawLine(x0, y0, x1, y1);
             break;
         }
         case HLINE_DRAW:
@@ -245,64 +140,22 @@ static void handleSingleCommand(uint16_t command)
         }
         case CIRCLE_DRAW:
         {
-            scratch[0] = command & 0x1FF;//x0
-            multiCommand = CIRCLE_DRAW_MC;
-            scratch[4] = 1;//scratch[4] contains next data thing to get
+            uint32_t x = command & 0x1FF;
+            uint32_t y, radius;
+            
+            while (SPIIO_empty());//Wait for data
+            y = SPIIO_pop() & 0x1FF;
+            while (SPIIO_empty());//Wait for data
+            radius = SPIIO_pop() & 0x1FF;
+            
+            SR_drawCircle(x, y, radius);
+            
             break;//TODO
         }
         case AUDIO_OP:
         {
             break;//TODO
         }
-        /*
-        case 3://Set x position
-        {
-            xPosition = command & 0x1FF;
-            break;
-        }
-        case 4://Set y position
-        {
-            yPosition = command & 0x1FF;
-            break;
-        }
-        case 5://Line draw from current position
-        {
-            scratch[0] = command & 0x1FF;//x destination
-            multiCommand = 5;
-            break;
-        }
-        case 6://Horizontal line draw from current position
-        {
-            uint16_t count = command & 0x1FF;
-            SR_drawHLine(xPosition, yPosition, count);
-            xPosition += count;
-            break;
-        }
-        case 7://Vertical line draw from current position
-        {
-            uint16_t count = command & 0x1FF;
-            SR_drawVLine(xPosition, yPosition, count);
-            yPosition += count;
-            break;
-        }
-        case 8://Rectangle from current position
-        {
-            scratch[0] = command & 0x1FF;//x count
-            multiCommand = 8;
-            break;
-        }
-        case 9://Triangle from current position
-        {
-            scratch[0] = command & 0x1FF;//x1
-            scratch[4] = 1;//Current step of fetching triangle coordinates
-            multiCommand = 9;
-            break;
-        }
-        case 10:
-        {
-            SR_drawCircle(xPosition, yPosition, command & 0x1FF);
-            break;
-        }*/
         default:
         {
             break;
@@ -320,29 +173,6 @@ static void handleCharacter(char character)
             //Just ignore a null character
             break;
         }
-        /*
-        //TODO make these into their own proper commands
-        case 0x01://Move up
-        {
-            yPosition -= 8;
-            break;
-        }
-        case 0x02://Move left
-        {
-            xPosition -= 8;
-            break;
-        }
-        case 0x03://Move down
-        {
-            yPosition += 8;
-            break;
-        }
-        case 0x04://Move right
-        {
-            xPosition += 8;
-            break;
-        }
-        */
         case 0x08://Backspace
         {//TODO fix this if at beginning of line
             --characterX;
@@ -411,7 +241,7 @@ static void incrementCharacterPosition()
     }
 }
 
-static void screenOperation(screenOp_t operation)
+static void screenOperation(spiScreenOp_t operation)
 {
     switch (operation)
     {

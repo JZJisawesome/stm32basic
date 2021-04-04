@@ -6,32 +6,19 @@
 //TODO add support for audio played on video mcu
 
 #include "bluepill.h"
+#include "communication_defs.h"
 #include "spiio_cpu.h"
 
 //Helper things
-typedef enum
+static inline void safeCommandPush(spiMajorCommand_t commandMajor, uint_fast16_t minorOrData)
 {
-    CHAR_WRITE = 0x00, SCREEN_OP = 0x01, STRING_WRITE = 0x02, CHAR_POS_SET = 0x03,
-    LINE_DRAW = 0x04, HLINE_DRAW = 0x05, VLINE_DRAW = 0x06, POLY_DRAW = 0x07,
-    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09
-} commandMajor_t;
-typedef enum {CLEAR_SCROP = 0x000, FILL_SCROP = 0x001, SCROLL_UP_SCROP = 0x002, SCROLL_DOWN_SCROP = 0x003} screenOp_t;
-typedef enum
-{
-    STOP_ALL_AUOP = 0x000,
-    STOP_CHANNEL0_AUOP = 0x001, NOTE_QUEUE_CHANNEL0_AUOP = 0x002,
-    STOP_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x102
-} audioOp_t;
-
-static inline void safeCommandPush(commandMajor_t commandMajor, uint_fast16_t minorOrData)
-{
-    uint_fast16_t command = (commandMajor << 9) | minorOrData;
+    uint_fast16_t command = ((uint16_t)(commandMajor) << 9) | minorOrData;
     
     SPIIO_smartFlush();//Flush if we are out of room; block until there is
     SPIIO_push(command);//Now it's safe to push
 }
 
-static inline void screenCommand(screenOp_t screenOp)
+static inline void screenCommand(spiScreenOp_t screenOp)
 {
     safeCommandPush(SCREEN_OP, (uint_fast16_t)(screenOp));
 }
