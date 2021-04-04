@@ -22,15 +22,15 @@ void main()
     
     VHAL_drawText("CPU MCU Initialized\n");
     
-    //TESTING
-/*************************************************************/
+/*TESTING***************************************************************/
     
     //VHAL_drawText_atPos(25, 25, "TEST");
     //VHAL_drawText("Testing 2");
-    VHAL_drawLine(0, 0, 400, 240);
+    //VHAL_drawLine(0, 0, 400, 240);
+    //VHAL_drawCircle(200, 120, 20);
     //while (true);
-    //TESTING end
-/*************************************************************/
+    
+/*TESTING end***********************************************************/
     
     BASIC_init();
     BASIC_begin();//Begin basic interpreter (never exits)

@@ -74,6 +74,8 @@ Major commands
 0x03: Character position set
 0x04: Line Draw
 
+0x08: Circle draw
+
 TODO add more/finalize the rest
 
 #### Regular command info
@@ -108,6 +110,13 @@ Pixel coordinates are 9 bits. 1st x coordinate are sent with command (bits 8:0)
 1st y coordinate is sent as bits 8:0 of next 16 transfer
 2nd x coordinate is sent as bits 8:0 of next 16 transfer
 2nd y coordinate is sent as bits 8:0 of next 16 transfer
+
+##### Circle draw
+
+All data is 9 bits (8:0)
+1st is x
+2nd is y
+3rd is radius
 
 ### BASIC Tokens (line_t.tokens)
 

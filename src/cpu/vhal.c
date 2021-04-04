@@ -147,8 +147,18 @@ void VHAL_drawLineTo(uint16_t x, uint16_t y)
     SPIIO_smartFlush();
     SPIIO_push(y);//End with sending y coordinate
 }
+*/
 
 //Shape drawing
+void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius)
+{
+    safeCommandPush(CIRCLE_DRAW, x);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(y);
+    SPIIO_smartFlush();//Flush if we are out of room; block until there is
+    SPIIO_push(radius);
+}
+/*
 void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount)
 {
     VHAL_setPos(x, y);

@@ -39,7 +39,7 @@ void VHAL_drawLine(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fa
 //Shape drawing
 void VHAL_drawRectangle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t xCount, uint_fast16_t yCount);//TODO
 void VHAL_drawTriangle(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint_fast16_t x2, uint_fast16_t y2);//TODO
-void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius);//TODO
+void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius);
 
 //void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount);
 //void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount);

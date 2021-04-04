@@ -8,6 +8,8 @@
 #include "ps2uart_cpu.h"
 #include "vhal.h"
 
+//NOTE: interpretText uses a ton of stack space (at least BASIC_LINE_LENGTH + 16 bytes)
+
 //Thanks https://stackoverflow.com/questions/40591312/c-macro-how-to-get-an-integer-value-into-a-string-literal/40591483
 #define STR_IMPL_(x) #x      //stringify argument
 #define STR(x) STR_IMPL_(x)  //indirection to expand argument macros
@@ -17,13 +19,20 @@
 //https://www.c64-wiki.com/wiki/Array
 //https://www.c64-wiki.com/wiki/Variable
 
+//Token types ()
+typedef enum
+{
+    //Any token with bit 7 clear should be interpreted as ascii
+    TOKEN_PRINT = 0x80,
+} token_t;
+
 //Lines are tokenized from keyboard input and stored into program memory
 typedef struct line_t line_t;
 struct line_t
 {
     line_t* nextLine;//If null, there is no next line
     uint16_t lineNumber;//Can be between 1 and 0xFFFF
-    uint8_t tokens[];
+    token_t tokens[];
 };
 
 //Variables are stored into variable memory (are 6 byte each)
@@ -79,11 +88,11 @@ void BASIC_init()//Init data structures
 
 void BASIC_begin()//Begin basic interpreter
 {
+    //Statically allocate room for lineBuffer (since it will be here forever)
+    static char lineBuffer[BASIC_LINE_LENGTH];//Buffer for entered text
+    
     while (true)
     {
-        //Statically allocate room for lineBuffer
-        static char lineBuffer[BASIC_LINE_LENGTH];//Buffer for entered text
-        
         VHAL_drawChar('>');
         VHAL_flush();//Force cursor to show up
         
@@ -144,8 +153,8 @@ static void interpretText(const char* enteredText)
     VHAL_drawText(enteredText);//TESTING
     VHAL_drawChar('\n');//TESTING
     
-    //Statically allocate room for a tokenized line buffer
-    static union
+    //Allocate room for a tokenized line buffer
+    union
     {
         line_t tokenizedLine;
         char storage[BASIC_LINE_LENGTH + 16];//A little bit of headroom in case entire line is filled and tokenize needs extra room

@@ -29,9 +29,9 @@ typedef enum
 typedef enum {CLEAR_SCROP = 0x000, FILL_SCROP = 0x001, SCROLL_UP_SCROP = 0x002, SCROLL_DOWN_SCROP = 0x003} screenOp_t;//TODO implement
 typedef enum
 {
-    STOP_ALL_AUOP = 0x000,//TODO implement
-    STOP_CHANNEL0_AUOP = 0x001, NOTE_QUEUE_CHANNEL0_AUOP = 0x002,//TODO implement
-    STOP_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x102//TODO implement
+    STOP_ALL_AUOP = 0x000, START_ALL_AUOP = 0x100,//Useful for synchronizing both channels//TODO implement
+    STOP_CHANNEL0_AUOP = 0x001, START_CHANNEL0_AUOP = 0x002, NOTE_QUEUE_CHANNEL0_AUOP = 0x003,//TODO implement
+    STOP_CHANNEL1_AUOP = 0x102, START_CHANNEL1_AUOP = 0x102, NOTE_QUEUE_CHANNEL1_AUOP = 0x103//TODO implement
 } audioOp_t;
 
 //Static vars
@@ -122,23 +122,34 @@ static void processingLoop()
                 }
                 case HLINE_DRAW_MC:
                 {
-                    break;
+                    break;//TODO
                 }
                 case VLINE_DRAW_MC:
                 {
-                    break;
+                    break;//TODO
                 }
                 case POLY_DRAW_MC:
                 {
-                    break;
+                    break;//TODO
                 }
                 case CIRCLE_DRAW_MC:
                 {
-                    break;
+                    if (scratch[4] == 2)
+                    {
+                        SR_drawCircle(scratch[0], scratch[1], command & 0x1FF);
+                        multiCommand = SINGLE;//Exit multi command
+                    }
+                    else
+                    {
+                        scratch[1] = command & 0x1FF;//y
+                        ++scratch[4];
+                    }   
+                    
+                    break;//TODO
                 }
                 case AUDIO_OP_MC:
                 {
-                    break;
+                    break;//TODO
                 }
                 /*
                 case 5://Line draw from current position
@@ -215,30 +226,33 @@ static void handleSingleCommand(uint16_t command)
         }
         case LINE_DRAW:
         {
-            scratch[0] = command & 0x1FF;//x0
+            scratch[0] = command & 0x1FF;//x
             multiCommand = LINE_DRAW_MC;
             scratch[4] = 1;//scratch[4] contains next coordinate to get
             break;
         }
         case HLINE_DRAW:
         {
-            break;
+            break;//TODO
         }
         case VLINE_DRAW:
         {
-            break;
+            break;//TODO
         }
         case POLY_DRAW:
         {
-            break;
+            break;//TODO
         }
         case CIRCLE_DRAW:
         {
-            break;
+            scratch[0] = command & 0x1FF;//x0
+            multiCommand = CIRCLE_DRAW_MC;
+            scratch[4] = 1;//scratch[4] contains next data thing to get
+            break;//TODO
         }
         case AUDIO_OP:
         {
-            break;
+            break;//TODO
         }
         /*
         case 3://Set x position
