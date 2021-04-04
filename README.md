@@ -19,7 +19,9 @@ PB15:   MOSI2, connected to Video MOSI2 (PB15) for SPI
 PA2:USART2 TX pin, connected to CPU USART2 RX pin (PA3)
 PA6:Composite video sync pin, connected to diode (see composite.h for circuit info)
 PA7:Composite video pin (MOSI1), connected to diode (see composite.h for circuit info)
+PA8:Audio channel 0 (connected to 1k resistor connected to buzzer and PB5 resistor)
 PB4:PS/2 clock pin
+PB5:Audio channel 1 (connected to 1k resistor connected to buzzer and PA8 resistor)
 PB7:PS/2 data pin
 PB12:NSS2, connected to CPU NSS2 (PB12) for SPI
 PB13:SCK2, connected to CPU SCK2 (PB13) for SPI

@@ -34,8 +34,9 @@ static uint_fast16_t characterY = 32;//In lines/pixels
 static void processingLoop();
 static void handleCommand(uint16_t command);
 static void handleCharacter(char character);
-static void screenOperation(spiScreenOp_t operation);
 static void incrementCharacterPosition();
+static void screenOperation(spiScreenOp_t operation);
+static void audioOperation(spiAudioOp_t operation);
 
 void Processing_begin(const uint8_t* fb)
 {
@@ -204,6 +205,7 @@ static void handleCommand(uint16_t command)
         }
         case AUDIO_OP:
         {
+            audioOperation((spiAudioOp_t)(command & 0x1FF));
             break;//TODO
         }
         case CHAR_RELX_POS_SET:
@@ -329,5 +331,15 @@ static void screenOperation(spiScreenOp_t operation)
             SR_scrollDown(8);
             break;
         }
+    }
+}
+
+static void audioOperation(spiAudioOp_t operation)
+{
+    switch (operation)
+    {
+        //TODO
+        //Or should this be done over uart?
+        //TODO make it so there is no buffering, just setting the current tone
     }
 }

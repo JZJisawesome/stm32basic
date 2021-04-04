@@ -6,7 +6,7 @@ typedef enum
 {
     CHAR_WRITE = 0x00, SCREEN_OP = 0x01, STRING_WRITE = 0x02, CHAR_POS_SET = 0x03,
     LINE_DRAW = 0x04, HLINE_DRAW = 0x05, VLINE_DRAW = 0x06, POLY_DRAW = 0x07,
-    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09, CHAR_RELX_POS_SET = 0x0A, CHAR_RELY_POS_SET = 0x0B//TODO implement audio_op
+    CIRCLE_DRAW = 0x08, AUDIO_OP = 0x09, CHAR_RELX_POS_SET = 0x0A, CHAR_RELY_POS_SET = 0x0B
 } spiMajorCommand_t;
 
 typedef enum
