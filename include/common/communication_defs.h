@@ -23,6 +23,10 @@ typedef enum
 } spiAudioOp_t;
 
 //PS/2 Commands
-//TODO
+typedef enum
+{
+    PS2_FN1 = 0x81, PS2_FN2, PS2_FN3, PS2_FN4, PS2_FN5, PS2_FN6, PS2_FN7, PS2_FN8, PS2_FN9, PS2_FN10, PS2_FN11, PS2_FN12,
+    PS2_INSERT, PS2_HOME, PS2_PGUP, PS2_END, PS2_PGDOWN, PS2_UP, PS2_DOWN, PS2_LEFT, PS2_RIGHT//TODO add more
+} ps2Code_t;//Interpret as ascii if msb not set
 
 #endif

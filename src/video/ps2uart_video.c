@@ -5,6 +5,7 @@
 
 #include "bluepill.h"
 #include "softrenderer.h"//TESTING
+#include "communication_defs.h"
 
 //FIXME caps lock shouldn't apply to numbers
 
@@ -24,6 +25,7 @@ static bool eRecieved = false;//0xE0 or 0xE1
 static bool f0Recieved = false;//0xF0
 
 static void handleByte();
+static void processSendable();
 static void sendData(uint8_t data);
 static char toAscii();
 
@@ -142,9 +144,6 @@ static void handleByte()
     {
         switch (byteBuffer)
         {
-            //TODO other special keys (arrows, insert, home, end page up/down, keypad /, escape (actually that should be handled in toAscii()), fn keys, print screen, pause break)
-            //Also handle numlock
-            //For keys that do not directly translate to ascii, don't use bottom special characters, send byte with high bit set instead of cleared
             case 0x58:
             {
                 capsLock = !capsLock;//Toggle caps lock
@@ -205,319 +204,441 @@ static void handleByte()
                 eRecieved = true;
                 break;
             }
-            case 0x70:
-            {
-                if (eRecieved)
-                {
-                    //TODO handle insert
-                    eRecieved = false;
-                }
-                else
-                    sendData(toAscii());//Interpret as '0' or ')'
-            }
-            case 0x71:
-            {
-                if (eRecieved)
-                {
-                    sendData(0x7F);//Delete in ascii
-                    eRecieved = false;//The 0xE0 was dealt with
-                }
-                else
-                    sendData(toAscii());//Interpret as keypad's '.'
-            }
-            case 0x5A:
-            {
-                if (eRecieved)//Deal with keypad enter
-                    eRecieved = false;
-                
-                sendData('\n');
-                break;
-            }
             default:
             {
-                //Not a control byte or special key: convert to ascii
-                sendData(toAscii());
+                //The byte sent does not modify internal state (ex. shift) but instead
+                //provides some sort of information to the cpu (ex. ascii data, arrow key press, etc)
+                //Decide the data to send and send it over uart
+                processSendable();
+                
+                if (eRecieved)
+                    eRecieved = false;//The e0 or e1 would have been handled by processSendable
                 break;
             }
         }
     }
 }
 
-static void sendData(uint8_t data)
+static void processSendable()
 {
+    //TODO other special keys (arrows, home, end, page up/down, fn keys, print screen, pause break)
+    //For keys that do not directly translate to ascii, don't use bottom special characters, send byte with high bit set instead of cleared
+    
+    const bool shifted = leftShifted || rightShifted;//Used by number row
+    const bool capalized = shifted ^ capsLock;//Used by letters
+    
+    uint8_t dataToSend;
+    
+    switch (byteBuffer)
+    {
+        case 0x70:
+        {
+            if (eRecieved)//Insert was pushed
+                dataToSend = PS2_INSERT;
+            else //Keypad 0 if numlock on, keypad delete if numlock off
+                dataToSend = numLock ? '0' : PS2_INSERT;
+            
+            break;
+        }
+        case 0x71:
+        {
+            if (eRecieved)//Delete was pushed
+                dataToSend = 0x7F;
+            else//Keypad period if numlock on, keypad delete if numlock off
+                dataToSend = numLock ? '.' : 0x7F;
+            
+            break;
+        }
+        case 0x4A:
+        {
+            if (eRecieved)//Keypad / was pushed
+                dataToSend = '/';
+            else//Regular ? and / key was pushed
+                dataToSend = shifted ? '?' : '/';
+            break;
+        }
+        case 0x5A:
+        {
+            dataToSend = '\n';//Keypad and regular enter
+            break;
+        }
+        case 0x76:
+        {
+            dataToSend = 0x1B;//Escape
+            break;
+        }
+        case 0x66:
+        {
+            dataToSend = 0x08;//Backspace
+            break;
+        }
+        case 0x0D:
+        {
+            dataToSend = '\t';
+            break;
+        }
+        case 0x0E:
+        {
+            dataToSend = shifted ? '~' : '`';
+            break;
+        }
+        case 0x16: 
+        {
+            dataToSend = shifted ? '!' : '1';
+            break;
+        }
+        case 0x1E:
+        {
+            dataToSend = shifted ? '@' : '2';
+            break;
+        }
+        case 0x26:
+        {
+            dataToSend = shifted ? '#' : '3';
+            break;
+        }
+        case 0x25:
+        {
+            dataToSend = shifted ? '$' : '4';
+            break;
+        }
+        case 0x2E:
+        {
+            dataToSend = shifted ? '%' : '5';
+            break;
+        }
+        case 0x36:
+        {
+            dataToSend = shifted ? '^' : '6';
+            break;
+        }
+        case 0x3D:
+        {
+            dataToSend = shifted ? '&' : '7';
+            break;
+        }
+        case 0x3E:
+        {
+            dataToSend = shifted ? '*' : '8';
+            break;
+        }
+        case 0x46:
+        {
+            dataToSend = shifted ? '(' : '9';
+            break;
+        }
+        case 0x45:
+        {
+            dataToSend = shifted ? ')' : '0';
+            break;
+        }
+        case 0x4E:
+        {
+            dataToSend = shifted ? '_' : '-';
+            break;
+        }
+        case 0x55:
+        {
+            dataToSend = shifted ? '+' : '=';
+            break;
+        }
+        case 0x15:
+        {
+            dataToSend = capalized ? 'Q' : 'q';
+            break;
+        }
+        case 0x1D:
+        {
+            dataToSend = capalized ? 'W' : 'w';
+            break;
+        }
+        case 0x24:
+        {
+            dataToSend = capalized ? 'E' : 'e';
+            break;
+        }
+        case 0x2D:
+        {
+            dataToSend = capalized ? 'R' : 'r';
+            break;
+        }
+        case 0x2C:
+        {
+            dataToSend = capalized ? 'T' : 't';
+            break;
+        }
+        case 0x35:
+        {
+            dataToSend = capalized ? 'Y' : 'y';
+            break;
+        }
+        case 0x3C:
+        {
+            dataToSend = capalized ? 'U' : 'u';
+            break;
+        }
+        case 0x43:
+        {
+            dataToSend = capalized ? 'I' : 'i';
+            break;
+        }
+        case 0x44:
+        {
+            dataToSend = capalized ? 'O' : 'o';
+            break;
+        }
+        case 0x4D:
+        {
+            dataToSend = capalized ? 'P' : 'p';
+            break;
+        }
+        case 0x54:
+        {
+            dataToSend = shifted ? '{' : '[';
+            break;
+        }
+        case 0x5B:
+        {
+            dataToSend = shifted ? '}' : ']';
+            break;
+        }
+        case 0x1C:
+        {
+            dataToSend = capalized ? 'A' : 'a';
+            break;
+        }
+        case 0x1B:
+        {
+            dataToSend = capalized ? 'S' : 's';
+            break;
+        }
+        case 0x23:
+        {
+            dataToSend = capalized ? 'D' : 'd';
+            break;
+        }
+        case 0x2B:
+        {
+            dataToSend = capalized ? 'F' : 'f';
+            break;
+        }
+        case 0x34:
+        {
+            dataToSend = capalized ? 'G' : 'g';
+            break;
+        }
+        case 0x33:
+        {
+            dataToSend = capalized ? 'H' : 'h';
+            break;
+        }
+        case 0x3B:
+        {
+            dataToSend = capalized ? 'J' : 'j';
+            break;
+        }
+        case 0x42:
+        {
+            dataToSend = capalized ? 'K' : 'k';
+            break;
+        }
+        case 0x4B:
+        {
+            dataToSend = capalized ? 'L' : 'l';
+            break;
+        }
+        case 0x4C:
+        {
+            dataToSend = shifted ? ':' : ';';
+            break;
+        }
+        case 0x52:
+        {
+            dataToSend = shifted ? '"' : '\'';
+            break;
+        }
+        case 0x1A:
+        {
+            dataToSend = capalized ? 'Z' : 'z';
+            break;
+        }
+        case 0x22:
+        {
+            dataToSend = capalized ? 'X' : 'x';
+            break;
+        }
+        case 0x21:
+        {
+            dataToSend = capalized ? 'C' : 'c';
+            break;
+        }
+        case 0x2A:
+        {
+            dataToSend = capalized ? 'V' : 'v';
+            break;
+        }
+        case 0x32:
+        {
+            dataToSend = capalized ? 'B' : 'b';
+            break;
+        }
+        case 0x31:
+        {
+            dataToSend = capalized ? 'N' : 'n';
+            break;
+        }
+        case 0x3A:
+        {
+            dataToSend = capalized ? 'M' : 'm';
+            break;
+        }
+        case 0x41:
+        {
+            dataToSend = shifted ? '<' : ',';
+            break;
+        }
+        case 0x49:
+        {
+            dataToSend = shifted ? '>' : '.';
+            break;
+        }
+        case 0x29:
+        {
+            dataToSend = ' ';
+            break;
+        }
+        case 0x5D:
+        {
+            dataToSend = shifted ? '|' : '\\';
+            break;
+        }
+        case 0x69:
+        {
+            dataToSend = numLock ? '1' : PS2_END;
+            break;
+        }
+        case 0x72:
+        {
+            dataToSend = numLock ? '2' : PS2_DOWN;
+            break;
+        }
+        case 0x7A:
+        {
+            dataToSend = numLock ? '3' : PS2_PGDOWN;
+            break;
+        }
+        case 0x6B:
+        {
+            dataToSend = numLock ? '4' : PS2_LEFT;
+            break;
+        }
+        case 0x73:
+        {
+            if (numLock)
+                dataToSend = '5';
+            else
+                return;//We don't actually send anything
+            break;
+        }
+        case 0x74:
+        {
+            dataToSend = numLock ? '6' : PS2_RIGHT;
+            break;
+        }
+        case 0x6C:
+        {
+            dataToSend = numLock ? '7' : PS2_HOME;
+            break;
+        }
+        case 0x75:
+        {
+            dataToSend = numLock ? '8' : PS2_UP;
+            break;
+        }
+        case 0x7D:
+        {
+            dataToSend = numLock ? '9' : PS2_PGUP;
+            break;
+        }
+        case 0x7C:
+        {
+            dataToSend = '*';
+            break;
+        }
+        case 0x7B:
+        {
+            dataToSend = '-';
+            break;
+        }
+        case 0x79:
+        {
+            dataToSend = '+';
+            break;
+        }
+        case 0x05:
+        {
+            dataToSend = PS2_FN1;
+            break;
+        }
+        case 0x06:
+        {
+            dataToSend = PS2_FN2;
+            break;
+        }
+        case 0x04:
+        {
+            dataToSend = PS2_FN3;
+            break;
+        }
+        case 0x0C:
+        {
+            dataToSend = PS2_FN4;
+            break;
+        }
+        case 0x03:
+        {
+            dataToSend = PS2_FN5;
+            break;
+        }
+        case 0x0B:
+        {
+            dataToSend = PS2_FN6;
+            break;
+        }
+        case 0x83:
+        {
+            dataToSend = PS2_FN7;
+            break;
+        }
+        case 0x0A:
+        {
+            dataToSend = PS2_FN8;
+            break;
+        }
+        case 0x01:
+        {
+            dataToSend = PS2_FN9;
+            break;
+        }
+        case 0x09:
+        {
+            dataToSend = PS2_FN10;
+            break;
+        }
+        case 0x78:
+        {
+            dataToSend = PS2_FN11;
+            break;
+        }
+        case 0x07:
+        {
+            dataToSend = PS2_FN12;
+            break;
+        }
+    }
+    
     //Wait for transmit buffer to empty (should never happen because
     //ps/2 is much slower than uart, even with a slow baud rate)
-    while (!(USART2_SR & (1 << 7)));
-    
-    USART2_DR = data;//Write data
-}
-
-static char toAscii()
-{
-    //https://techdocs.altium.com/display/FPGA/PS2+Keyboard+Scan+Codes
-    if (leftShifted || rightShifted || capsLock)
-    {
-        switch (byteBuffer)
-        {
-            case 0x0E:
-                return '~';
-            case 0x16: 
-                return '!';
-            case 0x1E:
-                return '@';
-            case 0x26:
-                return '#';
-            case 0x25:
-                return '$';
-            case 0x2E:
-                return '%';
-            case 0x36:
-                return '^';
-            case 0x3D:
-                return '&';
-            case 0x3E:
-                return '*';
-            case 0x46:
-                return '(';
-            case 0x45:
-                return ')';
-            case 0x4E:
-                return '_';
-            case 0x55:
-                return '+';
-            case 0x66:
-                return 0x08;//Backspace
-            case 0x0D:
-                return '\t';
-            case 0x15:
-                return 'Q';
-            case 0x1D:
-                return 'W';
-            case 0x24:
-                return 'E';
-            case 0x2D:
-                return 'R';
-            case 0x2C:
-                return 'T';
-            case 0x35:
-                return 'Y';
-            case 0x3C:
-                return 'U';
-            case 0x43:
-                return 'I';
-            case 0x44:
-                return 'O';
-            case 0x4D:
-                return 'P';
-            case 0x54:
-                return '{';
-            case 0x5B:
-                return '}';
-            case 0x1C:
-                return 'A';
-            case 0x1B:
-                return 'S';
-            case 0x23:
-                return 'D';
-            case 0x2B:
-                return 'F';
-            case 0x34:
-                return 'G';
-            case 0x33:
-                return 'H';
-            case 0x3B:
-                return 'J';
-            case 0x42:
-                return 'K';
-            case 0x4B:
-                return 'L';
-            case 0x4C:
-                return ':';
-            case 0x52:
-                return '"';
-            case 0x5A:
-                return '\n';
-            case 0x1A:
-                return 'Z';
-            case 0x22:
-                return 'X';
-            case 0x21:
-                return 'C';
-            case 0x2A:
-                return 'V';
-            case 0x32:
-                return 'B';
-            case 0x31:
-                return 'N';
-            case 0x3A:
-                return 'M';
-            case 0x41:
-                return '<';
-            case 0x49:
-                return '>';
-            case 0x4A:
-                return '?';
-            case 0x29:
-                return ' ';
-            case 0x6C:
-                return '7';
-            case 0x6B:
-                return '4';
-            case 0x69:
-                return '1';
-            case 0x75:
-                return '8';
-            case 0x73:
-                return '5';
-            case 0x72:
-                return '2';
-            case 0x70:
-                return '0';
-            case 0x7C:
-                return '*';
-            case 0x7D:
-                return '9';
-            case 0x74:
-                return '6';
-            case 0x7A:
-                return '3';
-            case 0x71:
-                return '.';
-            case 0x7B:
-                return '-';
-            case 0x79:
-                return '+';
-            case 0x5D:
-                return '|';
-            default:
-                return byteBuffer;
-        }
-    }
-    else//Lowercase
-    {
-        switch (byteBuffer)
-        {
-            case 0x0E:
-                return '`';
-            case 0x16: 
-            case 0x69:
-                return '1';
-            case 0x1E:
-            case 0x72:
-                return '2';
-            case 0x26:
-            case 0x7A:
-                return '3';
-            case 0x25:
-            case 0x6B:
-                return '4';
-            case 0x2E:
-            case 0x73:
-                return '5';
-            case 0x36:
-            case 0x74:
-                return '6';
-            case 0x3D:
-            case 0x6C:
-                return '7';
-            case 0x3E:
-            case 0x75:
-                return '8';
-            case 0x46:
-            case 0x7D:
-                return '9';
-            case 0x45:
-            case 0x70:
-                return '0';
-            case 0x4E:
-            case 0x7B:
-                return '-';
-            case 0x55:
-                return '=';
-            case 0x66:
-                return 0x08;//Backspace
-            case 0x0D:
-                return '\t';
-            case 0x15:
-                return 'q';
-            case 0x1D:
-                return 'w';
-            case 0x24:
-                return 'e';
-            case 0x2D:
-                return 'r';
-            case 0x2C:
-                return 't';
-            case 0x35:
-                return 'y';
-            case 0x3C:
-                return 'u';
-            case 0x43:
-                return 'i';
-            case 0x44:
-                return 'o';
-            case 0x4D:
-                return 'p';
-            case 0x54:
-                return '[';
-            case 0x5B:
-                return ']';
-            case 0x1C:
-                return 'a';
-            case 0x1B:
-                return 's';
-            case 0x23:
-                return 'd';
-            case 0x2B:
-                return 'f';
-            case 0x34:
-                return 'g';
-            case 0x33:
-                return 'h';
-            case 0x3B:
-                return 'j';
-            case 0x42:
-                return 'k';
-            case 0x4B:
-                return 'l';
-            case 0x4C:
-                return ';';
-            case 0x52:
-                return '\'';
-            case 0x5A:
-                return '\n';
-            case 0x1A:
-                return 'z';
-            case 0x22:
-                return 'x';
-            case 0x21:
-                return 'c';
-            case 0x2A:
-                return 'v';
-            case 0x32:
-                return 'b';
-            case 0x31:
-                return 'n';
-            case 0x3A:
-                return 'm';
-            case 0x41:
-                return ',';
-            case 0x49:
-                return '.';
-            case 0x4A:
-                return '/';
-            case 0x29:
-                return ' ';
-            case 0x7C:
-                return '*';
-            case 0x71:
-                return '.';
-            case 0x79:
-                return '+';
-            case 0x5D:
-                return '\\';
-            default:
-                return byteBuffer;
-        }
-    }
+    //while (!(USART2_SR & (1 << 7)));//NOTE: Commented out because unneeded
+    USART2_DR = dataToSend;//Write data
 }
