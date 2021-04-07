@@ -61,7 +61,8 @@ extern void __delayInstructions(uint32_t numberOfInstructions);//21.1851ns per i
  * first peripheral "decides" its section's location in the file.
  * 
  * Also note that registers that can be accessed by halfwords and only have into in the least
- * significant 16 bits, will be uint16_t* instead of uint32_t*
+ * significant 16 bits, will be uint16_t* instead of uint32_t* when possible. As boards are found to
+ * be picky about certain registers, they may be converted back to uint32_t
  */
 //FIXME test these registers with a variety of boards. Some don't like accessing certain registers by halfwords, only by words, while some don't care (ex. had to fix certain dma registers to be accessed by 32 bits)
 

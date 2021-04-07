@@ -1,6 +1,16 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+//Run timer at 4.5MHz
+//Feels like a good compromise; minimum of 70hz, good resolution under about 2000hz.
+//Also a factor of 72MHz, which makes for a nice prescaler value (16)
+//Note:
+//Frequency doesn't affect pitch of music; just reciprocal curve of reload value vs freq
+//Higher=better resolution (less aggressive curve), but higher lowest possible frequency
+//Lower=worse resolution (more agressive curve), but lower possible lowest frequency
+//y=TIMER_FREQ/value of ARR between 0 and 65535
+#define AUDIO_TIMER_FREQ 4500000
+
 #include <stdint.h>
 #include <stdbool.h>
 
