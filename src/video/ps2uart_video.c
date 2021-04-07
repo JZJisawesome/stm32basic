@@ -7,8 +7,6 @@
 #include "softrenderer.h"//TESTING
 #include "communication_defs.h"
 
-//FIXME caps lock shouldn't apply to numbers
-
 static enum {START = -1, PARITY = 8, STOP = 9} state = START;//States 0 to 7 are bits 0 to 7
 static uint8_t byteBuffer;
 
@@ -221,7 +219,7 @@ static void handleByte()
 
 static void processSendable()
 {
-    //TODO other special keys (arrows, home, end, page up/down, fn keys, print screen, pause break)
+    //TODO other special keys (print screen, pause break, windows, context menu (button btw windows and right control)))
     //For keys that do not directly translate to ascii, don't use bottom special characters, send byte with high bit set instead of cleared
     
     const bool shifted = leftShifted || rightShifted;//Used by number row
@@ -255,6 +253,87 @@ static void processSendable()
                 dataToSend = '/';
             else//Regular ? and / key was pushed
                 dataToSend = shifted ? '?' : '/';
+            break;
+        }
+        case 0x69:
+        {
+            if (eRecieved)//End pressed
+                dataToSend = PS2_END;
+            else//Keypad 1 or end
+                dataToSend = numLock ? '1' : PS2_END;
+            
+            break;
+        }
+        case 0x72:
+        {
+            if (eRecieved)//Down arrow key pressed
+                dataToSend = PS2_DOWN;
+            else//Keypad 2 or down
+                dataToSend = numLock ? '2' : PS2_DOWN;
+            
+            break;
+        }
+        case 0x7A:
+        {
+            if (eRecieved)//Page down pressed
+                dataToSend = PS2_PGDOWN;
+            else//Keypad 3 or page down
+                dataToSend = numLock ? '3' : PS2_PGDOWN;
+            
+            break;
+        }
+        case 0x6B:
+        {
+            if (eRecieved)//Left arrow key pressed
+                dataToSend = PS2_LEFT;
+            else//Keypad 4 or left
+                dataToSend = numLock ? '4' : PS2_LEFT;
+            
+            break;
+        }
+        case 0x73:
+        {
+            if (numLock)
+                dataToSend = '5';
+            else
+                return;//We don't send anything
+            
+            break;
+        }
+        case 0x74:
+        {
+            if (eRecieved)//Right arrow key pressed
+                dataToSend = PS2_RIGHT;
+            else//Keypad 6 or right
+                dataToSend = numLock ? '6' : PS2_RIGHT;
+            
+            break;
+        }
+        case 0x6C:
+        {
+            if (eRecieved)//Home key pressed
+                dataToSend = PS2_HOME;
+            else//Keypad 7 or home
+                dataToSend = numLock ? '7' : PS2_HOME;
+            
+            break;
+        }
+        case 0x75:
+        {
+            if (eRecieved)//Up arrow key pressed
+                dataToSend = PS2_UP;
+            else//Keypad 8 or up
+                dataToSend = numLock ? '8' : PS2_UP;
+            
+            break;
+        }
+        case 0x7D:
+        {
+            if (eRecieved)//Page up pressed
+                dataToSend = PS2_PGUP;
+            else//Keypad 9 or page up
+                dataToSend = numLock ? '9' : PS2_PGUP;
+            
             break;
         }
         case 0x5A:
@@ -510,54 +589,6 @@ static void processSendable()
         case 0x5D:
         {
             dataToSend = shifted ? '|' : '\\';
-            break;
-        }
-        case 0x69:
-        {
-            dataToSend = numLock ? '1' : PS2_END;
-            break;
-        }
-        case 0x72:
-        {
-            dataToSend = numLock ? '2' : PS2_DOWN;
-            break;
-        }
-        case 0x7A:
-        {
-            dataToSend = numLock ? '3' : PS2_PGDOWN;
-            break;
-        }
-        case 0x6B:
-        {
-            dataToSend = numLock ? '4' : PS2_LEFT;
-            break;
-        }
-        case 0x73:
-        {
-            if (numLock)
-                dataToSend = '5';
-            else
-                return;//We don't actually send anything
-            break;
-        }
-        case 0x74:
-        {
-            dataToSend = numLock ? '6' : PS2_RIGHT;
-            break;
-        }
-        case 0x6C:
-        {
-            dataToSend = numLock ? '7' : PS2_HOME;
-            break;
-        }
-        case 0x75:
-        {
-            dataToSend = numLock ? '8' : PS2_UP;
-            break;
-        }
-        case 0x7D:
-        {
-            dataToSend = numLock ? '9' : PS2_PGUP;
             break;
         }
         case 0x7C:
