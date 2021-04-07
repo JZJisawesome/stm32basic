@@ -142,7 +142,7 @@ static void handleByte()
     {
         switch (byteBuffer)
         {
-            //TODO other special keys (arrows, insert, home, end page up/down, keypad /, keypad enter, escape (actually that should be handled in toAscii()), fn keys, print screen, pause break)
+            //TODO other special keys (arrows, insert, home, end page up/down, keypad /, escape (actually that should be handled in toAscii()), fn keys, print screen, pause break)
             //Also handle numlock
             //For keys that do not directly translate to ascii, don't use bottom special characters, send byte with high bit set instead of cleared
             case 0x58:
@@ -224,6 +224,14 @@ static void handleByte()
                 }
                 else
                     sendData(toAscii());//Interpret as keypad's '.'
+            }
+            case 0x5A:
+            {
+                if (eRecieved)//Deal with keypad enter
+                    eRecieved = false;
+                
+                sendData('\n');
+                break;
             }
             default:
             {
