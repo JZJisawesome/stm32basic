@@ -43,11 +43,4 @@ void VHAL_drawRectangle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t xCount, 
 void VHAL_drawTriangle(uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint_fast16_t x2, uint_fast16_t y2);
 void VHAL_drawCircle(uint_fast16_t x, uint_fast16_t y, uint_fast16_t radius);
 
-//void VHAL_drawRectangle_atPos(uint32_t x, uint32_t y, uint32_t xCount, uint32_t yCount);
-//void VHAL_drawRectangle(uint32_t xCount, uint32_t yCount);
-//void VHAL_drawTriangle_atPos(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-//void VHAL_drawTriangle(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-//void VHAL_drawCircle_atPos(uint32_t x, uint32_t y, uint32_t radius);
-//void VHAL_drawCircle(uint32_t radius);
-
 #endif

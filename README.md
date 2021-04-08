@@ -73,29 +73,22 @@ Bits 15:9 are the major command
 Bits 8:0 are data or for minor commands
 
 Major commands
-0x00: Character write (bits 6:0)
-0x01: Screen operation based on bits 8:0
-0x02: String write
-0x03: Character position set
-0x04: Line Draw
-0x05: H line draw
-0x06: V line draw
-0x07: Polygon draw
-0x08: Circle draw
-
-0x0A: Character relative position set x
-0x0B: Character relative position set y
+Character write (bits 6:0)
+Screen operation based on bits 8:0
+String write
+Character position set
+Line Draw
+H line draw
+V line draw
+Polygon draw
+Circle draw
+Audio operation
+Character relative position set x
+Character relative position set y
 
 TODO add more/finalize the rest
 
 #### Regular command info
-
-##### Screen operation (minor commands)
-
-0x000: Screen clear
-0x001: Screen fill
-0x002: Screen character scroll up (8 pixels)
-0x003: Screen character scroll down (8 pixels)
 
 ##### Character relative position set x and y
 

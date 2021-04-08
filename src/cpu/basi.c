@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "ps2uart_cpu.h"
 #include "vhal.h"
@@ -75,6 +76,8 @@ static variable_t* variableMemoryEndPointer;//Should be set to byte after progra
 static void interpretText(const char* enteredText);
 static void tokenize(const char* enteredText, line_t* output);
 static uint8_t tokenOf(const char* string);
+static void execute(const line_t* line);
+static void storeLine(const line_t* line);//Will store line in program memory (destroys basic variables/strings/arrays)
 
 void BASIC_init()//Init data structures
 {
@@ -150,53 +153,100 @@ static void interpretText(const char* enteredText)
 {
     //NOTE: only interpret enteredText up to point where null byte is encountered
     
-    VHAL_drawText(enteredText);//TESTING
-    VHAL_drawChar('\n');//TESTING
+/*TESTING********************************************************************************************************/
+    VHAL_drawText(enteredText);
+    VHAL_drawChar('\n');
+/*TESTING********************************************************************************************************/
     
     //Allocate room for a tokenized line buffer
+    //TODO should this just be statically allocated because it can be relatively large?
+    //If so, make its size BASIC_LINE_LENGTH
     union
     {
         line_t tokenizedLine;
-        char storage[BASIC_LINE_LENGTH + 16];//A little bit of headroom in case entire line is filled and tokenize needs extra room
+        char storage[strlen(enteredText) + 8];//A little bit of headroom in case entire line is filled and tokenize needs extra room (really only 7 should be needed)
     } buffer;
     
     //Tokenize the text that was entered
     tokenize(enteredText, &buffer.tokenizedLine);
     
+/*TESTING********************************************************************************************************/
+    char testingBuffer[8];
+    VHAL_drawText(itoa(buffer.tokenizedLine.lineNumber, testingBuffer, 10));
+    VHAL_drawText(": ");
+    VHAL_drawText(buffer.tokenizedLine.tokens);
+    VHAL_drawChar('\n');
+/*TESTING********************************************************************************************************/
     
-    char testingBuffer[8];//TESTING
-    VHAL_drawText(itoa(buffer.tokenizedLine.lineNumber, testingBuffer, 10));//TESTING
-    VHAL_drawText(": ");//TESTING
-    VHAL_drawText(buffer.tokenizedLine.tokens);//TESTING
-    VHAL_drawChar('\n');//TESTING
-    
-    
-    
-    
-    //TODO now interpret (either execute or put into program memory)
-    //If 0, should be executed immediatly, else put into program memory in correct place
+    //If 0, should be executed immediately and not saved, else put into program memory in correct place
     if (buffer.tokenizedLine.lineNumber == 0)
-    {
-        //executeLine(&buffer.tokenizedLine);
-    }
+        execute(&buffer.tokenizedLine);
     else
-    {
-        //storeLine(&buffer.tokenizedLine);
-    }
+        storeLine(&buffer.tokenizedLine);
 }
 
-/* List of tokens
- * The ascii null byte is the terminator for the line; any strings in the line are not terminated
- * Treat as ascii if top bit clear
- * 0x80: 
- */
 static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredText and return in output (NOTE: leaves nextLine unchanged)
 {
     //Extract line number (if it exists, else 0 will be written)
     output->lineNumber = (uint16_t)(strtoul(enteredText, NULL, 10));
     while (isdigit((int)(*enteredText))) {++enteredText;}//Skip to the first non-number character
     
-    //Tokenize rest of line
+    //Tokenize rest of line//TODO
+    char character = *enteredText;
+    uint8_t* tokenOutputPointer = output->tokens;
+    
+    char buffer[16] = {0};//Must be big enough for the biggest of keywords
+    uint8_t bufferIndex = 0;
+    
+    bool parsingString = false;
+    
+    while (character != 0x00)
+    {
+        if (character == '\"')
+            parsingString = !parsingString;
+        
+        if (parsingString || isblank(character) || isdigit(character))//TODO deal with other non-tokenized punctuation (other than operators) (ex. semicolon, dollar sign sometimes, colon, brackets)
+        {
+            //Copy the character into the token array as raw ascii (including quotes)
+            *tokenOutputPointer = character;
+            ++tokenOutputPointer;
+            
+            //If we were in the middle of parsing anything, stop
+            bufferIndex = 0;//Reset the buffer index
+            memset(buffer, 0x00, 16);//Clear the buffer
+        }
+        else//Parsing anything else (variables and things that are tokenized)
+        {
+            buffer[bufferIndex] = character;
+            ++bufferIndex;
+            
+            
+        }
+        /*
+        switch (character)
+        {
+            case '\"':
+            {
+                parsingString = !parsingString;
+            }//Fallthrough to default
+            default:
+            {
+                //Copy the character into the token array as raw ascii
+                *tokenOutputPointer = character;
+                ++tokenOutputPointer;
+            }
+        }
+        */
+        
+        //Advance to next character
+        ++enteredText;
+        character = *enteredText;
+    }
+    
+    *tokenOutputPointer = 0x00;//Last byte in line is a null byte
+    
+    
+    /*
     char character = *enteredText;
     char buffer[16] = {0};//Must be big enough for the biggest of keywords
     uint8_t bufferIndex = 0;
@@ -257,7 +307,7 @@ static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredT
         
         if (parsingNumber)
         {
-            if ((character >= '0') && (character <= '9') || (character == '.'))
+            if (((character >= '0') && (character <= '9')) || (character == '.'))
             {
                 *tokenOutputPointer = character;
                 ++tokenOutputPointer;
@@ -272,20 +322,20 @@ static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredT
         }
         
         
-        /*
-        buffer[bufferIndex] = character;
-        ++bufferIndex;
+        
+        //buffer[bufferIndex] = character;
+        //++bufferIndex;
         
         
         //Keyword token
-        uint8_t token = tokenOf(buffer);
-        if (token != 0)
-        {
-            *tokenOutputPointer = token;
-            ++tokenOutputPointer;
+        //uint8_t token = tokenOf(buffer);
+        //if (token != 0)
+        //{
+        //    *tokenOutputPointer = token;
+        //    ++tokenOutputPointer;
             //TODO clear buffer at this point
-        }
-        */
+        //}
+        
         
         //Advance to next character
         ++enteredText;
@@ -293,9 +343,20 @@ static void tokenize(const char* enteredText, line_t* output)//Tokenize enteredT
     }
     
     *tokenOutputPointer = 0x00;//Last byte in line is a null byte
+    */
 }
 
 static uint8_t tokenOf(const char* string)//Returns 0 if a token was not found
 {
     return 0;//Temporary
+}
+
+static void execute(const line_t* line)
+{
+    //TODO
+}
+
+static void storeLine(const line_t* line)
+{
+    //TODO
 }

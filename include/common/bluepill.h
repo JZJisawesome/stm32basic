@@ -27,13 +27,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Useful C Things */
-
-extern int memcmp(const void* lhs, const void* rhs, size_t count);//TODO
-extern void* memset(void* dest, int ch, size_t count);//TODO
-extern void* memcpy(void* dest, const void* src, size_t count);//TODO
-extern void* memmove(void* dest, const void* src, size_t count);//TODO
-
 /* Useful functions */
 extern void __delayInstructions(uint32_t numberOfInstructions);//21.1851ns per instruction avg
 

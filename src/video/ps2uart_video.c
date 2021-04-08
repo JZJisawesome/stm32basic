@@ -7,6 +7,9 @@
 #include "softrenderer.h"//TESTING
 #include "communication_defs.h"
 
+//http://www.vetra.com/scancodes.html
+//http://www.burtonsys.com/ps2_chapweske.htm
+
 static enum {START = -1, PARITY = 8, STOP = 9} state = START;//States 0 to 7 are bits 0 to 7
 static uint8_t byteBuffer;
 
@@ -24,8 +27,6 @@ static bool f0Recieved = false;//0xF0
 
 static void handleByte();
 static void processSendable();
-static void sendData(uint8_t data);
-static char toAscii();
 
 void PS2UART_video_init()
 {
@@ -209,8 +210,7 @@ static void handleByte()
                 //Decide the data to send and send it over uart
                 processSendable();
                 
-                if (eRecieved)
-                    eRecieved = false;//The e0 or e1 would have been handled by processSendable
+                eRecieved = false;//The e0 or e1 would have been handled by processSendable
                 break;
             }
         }
