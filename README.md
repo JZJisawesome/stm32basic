@@ -2,6 +2,8 @@
 
 Basic interpreter (PS2 Keyboard and composite) using 2 stm32f103c8t6 mcus.
 
+![](IMG_20210911_153433.jpg)
+
 ## Status
 
 Taking a break for some time to focus on studies.
