@@ -2,6 +2,25 @@
 
 Basic interpreter (PS2 Keyboard and composite) using 2 stm32f103c8t6 mcus.
 
+## Status
+
+Taking a break for some time to focus on studies.
+
+### What works
+
+- C environment setup (using my own bare-metal blue pill code: https://gitlab.com/JZJisawesome/baremetalbluepill)
+- SPI communication between MCUs
+- Higher level draw call interface over SPI
+- PS2 keyboard support (both on GPU and CPU side)
+- Software rendering, including text scrolling and other features
+- Composite output (using my own compositestm32 code:https://gitlab.com/JZJisawesome/compositestm32)
+- Command prompt input 
+
+### Todo
+
+- Sound
+- BASIC command execution code
+
 ## Connections
 
 Reset lines are tied together, pulled up, and active low (reset by pushing button)
